@@ -1,615 +1,306 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="si">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>ERANDA MD — Connect</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ERANNDA-MD pair</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
   <style>
-    :root {
-      --bg: #e8edf3;
-      --shadow-light: rgba(255,255,255,0.92);
-      --shadow-dark: rgba(163,177,198,0.72);
-      --accent: #a78bfa;
-      --accent2: #7c3aed;
-      --text: #374151;
-      --subtext: #6b7280;
-      --inset-light: rgba(255,255,255,0.85);
-      --inset-dark: rgba(163,177,198,0.55);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    * { box-sizing:border-box; margin:0; padding:0 }
     body {
-      font-family: 'Poppins', sans-serif;
-      background: var(--bg);
-      min-height: 100vh;
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 20px;
+      font-family:'Poppins',sans-serif;
+      background: radial-gradient(circle at center, #000000 0%, #111111 100%);
+      color:#ffffff;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      padding:20px;
+      animation:fadeIn 2s ease;
     }
 
-    /* ─── BACK LINK ─────────────────────── */
-    .back-link {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      background: var(--bg);
-      border: none;
-      border-radius: 12px;
-      padding: 10px 18px;
-      font-family: 'Poppins', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--subtext);
-      cursor: pointer;
-      box-shadow:
-        -4px -4px 10px var(--shadow-light),
-         4px  4px 10px var(--shadow-dark);
-      transition: all 0.25s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      text-decoration: none;
-      z-index: 99;
+    @keyframes fadeIn {
+      0% { opacity:0; transform:scale(0.98); }
+      100% { opacity:1; transform:scale(1); }
     }
 
-    .back-link:hover {
-      color: var(--accent2);
-      box-shadow:
-        -2px -2px 6px var(--shadow-light),
-         2px  2px 6px var(--shadow-dark);
+    
+    .particles span {
+      position:absolute;
+      display:block;
+      width: 9px;
+      height: 9px;
+      background:radial-gradient(circle,#EA00FF,#444);
+      border-radius:50%;
+      opacity:0.5;
+      animation:float 6s linear infinite;
     }
 
-    /* ─── MAIN CARD ─────────────────────── */
-    .card {
-      background: var(--bg);
-      border-radius: 30px;
-      padding: 50px 36px 40px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow:
-        -16px -16px 36px var(--shadow-light),
-         16px  16px 36px var(--shadow-dark);
-      text-align: center;
-      animation: popUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    @keyframes float {
+      0% { transform:translateY(100vh) scale(0.6); opacity:0; }
+      30% { opacity:1; }
+      100% { transform:translateY(-10vh) scale(1.2); opacity:0; }
     }
 
-    @keyframes popUp {
-      from { opacity: 0; transform: translateY(40px) scale(0.95); }
-      to   { opacity: 1; transform: translateY(0)    scale(1); }
+    .wrap { position:relative; z-index:2; width:380px; max-width:95%; }
+
+    .box {
+      background: linear-gradient(180deg, rgba(153, 50, 205, 0.1), rgba(118, 34, 139, 0.4));
+      border: 1px solid rgba(170, 0, 200, 0.5);     
+      border-radius:20px;
+      padding:90px 22px 40px;
+      text-align:center;
+      box-shadow:0 0 35px rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      transition:all .5s ease;
+      animation:boxPop 1.3s ease;
     }
 
-    /* ─── LOTUS MINI ────────────────────── */
-    .mini-lotus {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: var(--bg);
-      box-shadow:
-        -8px -8px 18px var(--shadow-light),
-         8px  8px 18px var(--shadow-dark);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
-      animation: floatMini 4s ease-in-out infinite;
+    @keyframes boxPop {
+      0% { transform:translateY(60px); opacity:0; }
+      100% { transform:translateY(0); opacity:1; }
     }
 
-    @keyframes floatMini {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-6px); }
+     .span {
+        display: inline-block;        
+        width: 15px;                  
+        height: 15px;                
+        background-color: #D6FF00;  
+        box-shadow: 0 0 10px #D6FF00;     
+        border-radius: 50%;
+        position: absolute;
+        bottom: 89%;
+        left: 60%;
+  }
+  
+  
+    .avatar {
+      position:absolute;
+      top:-60px;
+      left:50%;
+      transform:translateX(-50%);
+      object-fit: cover;
+      width:120px;
+      height:120px;
+      border-radius:50%;
+      overflow:hidden;
+      border:4px solid #B100C9;
+      box-shadow: 0 0 25px rgba(181, 0, 200, 0.5);
+      animation:glow 3s infinite alternate;
     }
 
-    .mini-lotus svg { width: 56px; height: 56px; }
-
-    /* ─── HEADINGS ──────────────────────── */
-    .tag {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--accent2);
-      margin-bottom: 8px;
-      opacity: 0.75;
+    @keyframes glow {
+      from { box-shadow:0 0 20px rgba(151, 0, 200, 0.5); }
+      to { box-shadow:0 0 40px rgba(170, 0, 200, 0.5); }
     }
 
-    .card h1 {
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--text);
-      line-height: 1.2;
-      letter-spacing: -0.5px;
-    }
+    .avatar img { width:100%; height:100%; object-fit:cover; }
 
-    .card h1 span {
-      background: linear-gradient(135deg, #7c3aed, #a78bfa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+    h3 { color:#CB00FF; margin-top:6px; letter-spacing:1px; }
+    h6 { color:#abc; font-weight:500; margin:6px 0 }
 
-    .card p.sub {
-      margin-top: 8px;
-      font-size: 13px;
-      color: var(--subtext);
-      line-height: 1.55;
-    }
-
-    /* ─── DIVIDER ───────────────────────── */
-    .sep {
-      width: 48px;
-      height: 3px;
-      background: linear-gradient(90deg, #7c3aed, #a78bfa);
-      border-radius: 100px;
-      margin: 20px auto;
-    }
-
-    /* ─── STEPS ─────────────────────────── */
-    .steps {
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-      margin-bottom: 28px;
-    }
-
-    .step {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--subtext);
-    }
-
-    .step-dot {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: var(--bg);
-      box-shadow:
-        -3px -3px 6px var(--shadow-light),
-         3px  3px 6px var(--shadow-dark);
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--subtext);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .step.active .step-dot {
-      background: linear-gradient(135deg, #7c3aed, #a78bfa);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(124,58,237,0.3);
-    }
-
-    .step.active { color: var(--accent2); }
-
-    .step-line {
-      width: 20px;
-      height: 2px;
-      background: var(--shadow-dark);
-      border-radius: 2px;
-      opacity: 0.4;
-    }
-
-    /* ─── INPUT ─────────────────────────── */
-    .field-label {
-      text-align: left;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--subtext);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .input-wrap {
-      position: relative;
-      margin-bottom: 16px;
-    }
-
-    .input-wrap input {
-      width: 100%;
-      padding: 16px 18px 16px 48px;
-      border-radius: 16px;
-      border: none;
+    .input-container { margin-top:16px; text-align:left; }
+    .input-container input {
+      width:100%;
+      padding:12px 14px;
+      border-radius:10px;
+      border:none;
+      background: #111;
       outline: none;
-      background: var(--bg);
-      font-family: 'Poppins', sans-serif;
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-      box-shadow:
-        inset -5px -5px 10px var(--inset-light),
-        inset  5px  5px 10px var(--inset-dark);
-      transition: box-shadow 0.3s ease;
+      color:#fff;
+      font-size:15px;
+      font-weight:700;
+      border:1px solid rgba(255,255,255,0.15);
+      transition:0.25s;
+    }
+    .input-container input:focus {
+      box-shadow: inset 0 0 14px #CB00FF;
+      border-color:#B100FF;
     }
 
-    .input-wrap input::placeholder { color: var(--subtext); font-weight: 400; opacity: 0.7; }
-
-    .input-wrap input:focus {
-      box-shadow:
-        inset -5px -5px 10px var(--inset-light),
-        inset  5px  5px 10px var(--inset-dark),
-        0 0 0 2px rgba(124,58,237,0.25);
+    .submit-btn {
+      margin-top:14px;
+      width:100%;
+      padding:12px 0;
+      background:#A000C9;
+      color:#000;
+      border:none;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+      transition: .4s;
+    }
+    .submit-btn:hover {
+      transform:scale(1.04);
+      color: #F700FF;
+      background: #444;
     }
 
-    .input-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 18px;
-      pointer-events: none;
+    .info {
+      margin-top:14px;
+      color:#bbb;
+      font-weight:600;
     }
 
-    /* ─── SUBMIT BUTTON ─────────────────── */
-    .btn-submit {
-      width: 100%;
-      padding: 16px;
-      border: none;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #7c3aed, #a78bfa);
-      color: #fff;
-      font-family: 'Poppins', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: 0.5px;
-      box-shadow:
-        -4px -4px 10px var(--shadow-light),
-         4px  4px 10px var(--shadow-dark),
-         0 8px 20px rgba(124,58,237,0.3);
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .btn-submit:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow:
-        -4px -4px 10px var(--shadow-light),
-         4px  4px 10px var(--shadow-dark),
-         0 14px 28px rgba(124,58,237,0.4);
-    }
-
-    .btn-submit:disabled {
-      opacity: 0.65;
-      cursor: wait;
-    }
-
-    /* Spinner */
-    .spin {
-      width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,0.4);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: none;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ─── RESULT BOX ────────────────────── */
-    .result-box {
-      margin-top: 18px;
-      background: var(--bg);
-      border-radius: 16px;
-      padding: 18px 20px;
-      box-shadow:
-        inset -5px -5px 10px var(--inset-light),
-        inset  5px  5px 10px var(--inset-dark);
-      display: none;
-    }
-
-    .result-box.visible { display: block; animation: fadeIn 0.4s ease; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
-
-    .code-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: var(--subtext);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .code-value {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: 4px;
-      background: linear-gradient(135deg, #7c3aed, #a78bfa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      cursor: pointer;
-      user-select: all;
-    }
-
-    .copy-hint {
-      font-size: 11px;
-      color: var(--subtext);
-      margin-top: 6px;
-      opacity: 0.7;
-    }
-
-    .error-msg {
-      font-size: 13px;
-      font-weight: 600;
-      color: #ef4444;
-    }
-
-    /* ─── ACTIONS ROW ───────────────────── */
     .actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      margin-top:20px;
     }
 
-    .btn-ghost {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 14px;
-      background: var(--bg);
-      font-family: 'Poppins', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--subtext);
-      cursor: pointer;
-      box-shadow:
-        -4px -4px 8px var(--shadow-light),
-         4px  4px 8px var(--shadow-dark);
-      transition: all 0.25s;
+    .join-btn {
+      background:#A400C9;
+      color:#000;
+      padding:10px 18px;
+      border-radius:12px;
+      font-weight:700;
+      cursor:pointer;
+      border:none;
+      transition:0.25s;
     }
 
-    .btn-ghost:hover {
-      color: var(--accent2);
-      box-shadow:
-        -2px -2px 5px var(--shadow-light),
-         2px  2px 5px var(--shadow-dark);
+    .join-btn:hover { background:#f1f1f1; }
+
+    .ghost-btn {
+      background:transparent;
+      border:1px solid #fff3;
+      padding:10px 12px;
+      border-radius:10px;
+      color: red;
+      font-weight: 700;
+      cursor:pointer;
     }
 
-    /* ─── HELP TIPS ─────────────────────── */
-    .tips {
-      margin-top: 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .ghost-btn:hover { color:#fff; border-color:#fff6; }
+
+    .box.hide { transform:translateY(120px) scale(.95); opacity:0; }
+
+    @media (max-width:420px){
+      .avatar{width:96px;height:96px;top:-48px}
+      .box{padding-top:78px}
+    
     }
-
-    .tip {
-      background: var(--bg);
-      border-radius: 14px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow:
-        -4px -4px 8px var(--shadow-light),
-         4px  4px 8px var(--shadow-dark);
-      text-align: left;
-    }
-
-    .tip-icon {
-      font-size: 18px;
-      min-width: 28px;
-    }
-
-    .tip-text {
-      font-size: 12px;
-      color: var(--subtext);
-      line-height: 1.45;
-      font-weight: 500;
-    }
-
-    .tip-text strong { color: var(--accent2); }
-
-    /* ─── FOOTER ────────────────────────── */
-    .card-footer {
-      margin-top: 28px;
-      font-size: 11px;
-      color: var(--subtext);
-      opacity: 0.6;
-    }
-
-    .card-footer strong { color: var(--accent2); opacity: 1; }
-
-    /* ─── RESPONSIVE ────────────────────── */
-    @media (max-width: 480px) {
-      .card { padding: 40px 22px 32px; border-radius: 24px; }
-      .back-link { top: 14px; left: 14px; padding: 8px 14px; font-size: 12px; }
-    }
+    
   </style>
 </head>
+
 <body>
+  <div class="particles" id="particles"></div>
 
-  <a href="/" class="back-link">← Home</a>
+  <div class="wrap">
+    <div class="box" id="mainBox">         
+      <div class="avatar">
+        <img src="https://files.catbox.moe/5ncuwv.jpeg" alt="Avatar">          
+      </div>  
+     <span class="span"></span> 
+      <h3>ERNNDA-MD PAIR</h3>
+      <h6>Canet Bot</h6>
+      <h6>ᴇɴᴛᴇʀ ʏᴏᴜʀ ᴡʜᴀᴛꜱᴀᴘᴘ ɴᴜᴍʙᴇʀ ᴡɪᴛʜ ᴄᴏᴜɴᴛʀʏ ᴄᴏᴅᴇ</h6>
 
-  <div class="card">
-
-    <!-- Mini lotus -->
-    <div class="mini-lotus">
-      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="mg1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#7c3aed"/>
-            <stop offset="100%" style="stop-color:#c4b5fd"/>
-          </linearGradient>
-        </defs>
-        <ellipse cx="100" cy="90" rx="13" ry="40" fill="#a78bfa" opacity="0.6" transform="rotate(-40 100 120)"/>
-        <ellipse cx="100" cy="90" rx="13" ry="40" fill="#a78bfa" opacity="0.6" transform="rotate(0 100 120)"/>
-        <ellipse cx="100" cy="90" rx="13" ry="40" fill="#a78bfa" opacity="0.6" transform="rotate(40 100 120)"/>
-        <ellipse cx="100" cy="90" rx="13" ry="40" fill="#a78bfa" opacity="0.6" transform="rotate(-80 100 120)"/>
-        <ellipse cx="100" cy="90" rx="13" ry="40" fill="#a78bfa" opacity="0.6" transform="rotate(80 100 120)"/>
-        <ellipse cx="100" cy="95" rx="10" ry="30" fill="url(#mg1)" opacity="0.9" transform="rotate(-30 100 120)"/>
-        <ellipse cx="100" cy="95" rx="10" ry="30" fill="url(#mg1)" opacity="0.9" transform="rotate(0 100 120)"/>
-        <ellipse cx="100" cy="95" rx="10" ry="30" fill="url(#mg1)" opacity="0.9" transform="rotate(30 100 120)"/>
-        <ellipse cx="100" cy="95" rx="10" ry="30" fill="url(#mg1)" opacity="0.9" transform="rotate(60 100 120)"/>
-        <ellipse cx="100" cy="95" rx="10" ry="30" fill="url(#mg1)" opacity="0.9" transform="rotate(-60 100 120)"/>
-        <circle cx="100" cy="120" r="16" fill="url(#mg1)"/>
-        <circle cx="100" cy="120" r="9" fill="#ede9fe"/>
-        <circle cx="100" cy="120" r="4" fill="#7c3aed"/>
-      </svg>
-    </div>
-
-    <div class="tag">✦ ERANDA MD · Pair</div>
-    <h1>Connect Your<br/><span>WhatsApp</span></h1>
-    <p class="sub">Enter your number with country code to get your pairing code.</p>
-
-    <div class="sep"></div>
-
-    <!-- Steps -->
-    <div class="steps">
-      <div class="step active"><div class="step-dot">1</div><span>Enter Number</span></div>
-      <div class="step-line"></div>
-      <div class="step" id="step2"><div class="step-dot">2</div><span>Get Code</span></div>
-      <div class="step-line"></div>
-      <div class="step" id="step3"><div class="step-dot">3</div><span>Linked ✓</span></div>
-    </div>
-
-    <!-- Input -->
-    <div class="field-label">WhatsApp Number</div>
-    <div class="input-wrap">
-      <span class="input-icon">📱</span>
-      <input id="number" type="tel" placeholder="94xxxxxxxx" inputmode="numeric" pattern="[0-9]*" autocomplete="tel"/>
-    </div>
-
-    <button id="submitBtn" class="btn-submit">
-      <div class="spin" id="spin"></div>
-      <span id="btnLabel">🔗 Get Pairing Code</span>
-    </button>
-
-    <!-- Result -->
-    <div class="result-box" id="resultBox">
-      <div id="resultContent"></div>
-    </div>
-
-    <!-- Action row -->
-    <div class="actions">
-      <button class="btn-ghost" id="clearBtn">🗑 Clear</button>
-      <button class="btn-ghost" onclick="window.open('https://whatsapp.com/channel/0029Vb5OiseHltY10IBkF112/1066','_blank')">📢 Channel</button>
-    </div>
-
-    <!-- Tips -->
-    <div class="tips">
-      <div class="tip">
-        <span class="tip-icon">💡</span>
-        <span class="tip-text">Include country code — e.g. <strong>94712345678</strong> for Sri Lanka</span>
+      <div class="input-container">
+        <input id="number" type="tel" placeholder="94xxxxxxx" inputmode="numeric" pattern="[0-9]*" />
       </div>
-      <div class="tip">
-        <span class="tip-icon">⚙️</span>
-        <span class="tip-text">In WhatsApp → Linked Devices → <strong>Link with phone number</strong> → Enter the code</span>
+      <button id="submit" class="submit-btn">SUBMIT</button>
+      
+     <div class="info" id="pair" style="min-height:28px"></div>
+ 
+      <div class="actions">
+        <button class="join-btn" id="joinBtn">JOIN CHANNEL</button>
+        <button class="ghost-btn" id="clearBtn">CLEAR</button>
       </div>
-      <div class="tip">
-        <span class="tip-icon">⏱️</span>
-        <span class="tip-text">Code is valid for <strong>60 seconds</strong> — enter it quickly after receiving</span>
-      </div>
-    </div>
-
-    <div class="card-footer">
-      <strong>ERANDA MD V1</strong> · ᴋᴇᶻᵘ · Built with 💜
     </div>
   </div>
 
   <script>
-    const numInput  = document.getElementById('number');
-    const submitBtn = document.getElementById('submitBtn');
-    const spin      = document.getElementById('spin');
-    const btnLabel  = document.getElementById('btnLabel');
-    const resultBox = document.getElementById('resultBox');
-    const resultEl  = document.getElementById('resultContent');
-    const step2     = document.getElementById('step2');
-    const step3     = document.getElementById('step3');
+  const particlesContainer = document.getElementById('particles');
+  const particlesCount = 70; // number of dots
 
-    function setLoading(on) {
-      submitBtn.disabled = on;
-      spin.style.display = on ? 'block' : 'none';
-      btnLabel.textContent = on ? 'Connecting...' : '🔗 Get Pairing Code';
-    }
+  for (let i = 0; i < particlesCount; i++) {
+    const span = document.createElement('span');
+    // random position
+    span.style.left = Math.random() * 100 + 'vw';
+    span.style.top = Math.random() * 100 + 'vh';
+    // random size
+    const size = Math.random() * 1 + 4;
+    span.style.width = size + 'px';
+    span.style.height = size + 'px';
+    // random animation duration
+    span.style.animationDuration = (5 + Math.random() * 5) + 's';
+    // random delay
+    span.style.animationDelay = Math.random() * 5 + 's';
+    particlesContainer.appendChild(span);
+  }
 
-    function showResult(html) {
-      resultEl.innerHTML = html;
-      resultBox.classList.add('visible');
-    }
 
-    function activateStep(el) {
-      el.classList.add('active');
-      el.querySelector('.step-dot').style.background = 'linear-gradient(135deg,#7c3aed,#a78bfa)';
-      el.querySelector('.step-dot').style.color = '#fff';
-      el.querySelector('.step-dot').style.boxShadow = '0 4px 12px rgba(124,58,237,0.3)';
-    }
+  
+  
+  
+    // submit behavior (same as before but now shows in #pair)
+    const pair = document.getElementById('pair');
+    const submit = document.getElementById('submit');
+    const num = document.getElementById('number');
 
-    submitBtn.addEventListener('click', async () => {
-      const raw = numInput.value.replace(/[^0-9]/g, '');
-      if (raw.length < 10) {
-        showResult('<p class="error-msg">⚠️ Please enter a valid number with country code.</p>');
-        resultBox.classList.add('visible');
+    submit.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (!num.value || num.value.replace(/[^0-9]/g,'').length < 11) {
+        pair.innerHTML = '<span style="color:#ffb3b3;font-weight:700">Invalid or missing number</span>';
         return;
       }
-
-      setLoading(true);
-      activateStep(step2);
-      resultBox.classList.remove('visible');
-
+      const number = num.value.replace(/[^0-9]/g,'');
+      num.value = '+' + number;
+      num.style.background = '#120000';
+      pair.innerHTML = '<span style="color:#ffdede;font-weight:700">Please wait...</span>';
       try {
-        const res  = await fetch(`/code?number=${raw}`);
-        const data = await res.json();
-        const code = data.code || 'Error';
-
-        if (code === 'Error' || code === 'Service Unavailable') {
-          showResult(`<p class="error-msg">❌ ${code} — please try again.</p>`);
-        } else {
-          activateStep(step3);
-          showResult(`
-            <div class="code-label">Your Pairing Code</div>
-            <div class="code-value" id="codeVal" onclick="copyCode()" title="Tap to copy">${code}</div>
-            <div class="copy-hint">👆 Tap code to copy · Valid for 60s</div>
-          `);
-        }
-      } catch (e) {
-        showResult('<p class="error-msg">❌ Network error — check connection and retry.</p>');
-      } finally {
-        setLoading(false);
+        let res = await fetch(`/code?number=${number}`);
+        let data = await res.json();
+        let code = data.code || 'Service Unavailable';
+        pair.innerHTML = `<div id="copy" style="color:#ffb3b3;font-weight:700;cursor:pointer" onclick="copyCode()"><strong>CODE:</strong> <span style="color:#fff">${code}</span></div>`;
+      } catch (err) {
+        pair.innerHTML = '<span style="color:orangered;font-weight:700">Error fetching code</span>';
       }
     });
 
-    function copyCode() {
-      const el = document.getElementById('codeVal');
+    function copyCode(){
+      const el = document.getElementById('copy');
       if (!el) return;
-      navigator.clipboard?.writeText(el.innerText.trim()).then(() => {
-        const orig = el.innerHTML;
-        el.innerHTML = '✅ Copied!';
-        el.style.fontSize = '18px';
-        setTimeout(() => { el.innerHTML = orig; el.style.fontSize = ''; }, 1200);
-      }).catch(() => {});
+      const txt = el.innerText.replace('CODE:','').trim();
+      navigator.clipboard?.writeText(txt).then(()=>{
+        const old = el.innerHTML;
+        el.innerHTML = '<strong style="color:lime">COPIED</strong>';
+        setTimeout(()=> el.innerHTML = old,700);
+      }).catch(()=>{});
     }
 
-    document.getElementById('clearBtn').addEventListener('click', () => {
-      numInput.value = '';
-      resultBox.classList.remove('visible');
-      resultEl.innerHTML = '';
-      [step2, step3].forEach(s => {
-        s.classList.remove('active');
-        const dot = s.querySelector('.step-dot');
-        dot.style.background = '';
-        dot.style.color = '';
-        dot.style.boxShadow = '';
-      });
+    // clear button
+    document.getElementById('clearBtn').addEventListener('click', ()=> {
+      num.value=''; pair.innerHTML=''; num.type='tel'; num.style.background='';
     });
 
-    numInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') submitBtn.click();
+    // join button: slide & fade then open link
+    const joinBtn = document.getElementById('joinBtn');
+    const mainBox = document.getElementById('mainBox');
+    const channelURL = "https://whatsapp.com/channel/0029Vb5OiseHltY10IBkF112/1066";
+
+    joinBtn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      // play a small scale/translate animation by toggling hide class
+      mainBox.classList.add('hide');
+      // after animation ends, open link
+      setTimeout(()=> {
+        // try open in new tab; fallback to same tab
+        const opened = window.open(channelURL, '_blank', 'noopener,noreferrer');
+        if (!opened) window.location.href = channelURL;
+      }, 450);
+    });
+
+    // optional: allow pressing Enter on input to submit
+    num.addEventListener('keydown', (e)=> {
+      if (e.key === 'Enter') submit.click();
     });
   </script>
 </body>
-</html>
+  </html>

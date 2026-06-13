@@ -26,11 +26,10 @@ const {
   getContentType,
   makeCacheableSignalKeyStore,
   Browsers,
-  fetchLatestBaileysVersion,
   jidNormalizedUser,
   downloadContentFromMessage,
   DisconnectReason
-} = require('@whiskeysockets/baileys');
+} = require('dct-dula-baileys');
 const { title } = require('process');
 
 // ---------------- CONFIG ----------------
@@ -44,11 +43,11 @@ const config = {
   AUTO_LIKE_EMOJI: ['💙', '🩷', '💜', '🤎', '🧡', '🩵', '💛', '🩶', '♥️', '💗', '❤️‍🔥'],
   PREFIX: '.',
   MAX_RETRIES: 3,
-  GROUP_INVITE_LINK: 'https://chat.whatsapp.com/Ctlfm8HwU6u9zaDVF00M8K?mode=gi_t',
+  GROUP_INVITE_LINK: 'https://chat.whatsapp.com/CGfvHqIAyRAISJfzJ6VJTo',
   RCD_IMAGE_PATH: 'https://files.catbox.moe/fwykff.jpeg',
   NEWSLETTER_JID: '120363424104757487@newsletter',
   OTP_EXPIRY: 300000,
-  OWNER_NUMBER: process.env.OWNER_NUMBER || '94740285058',
+  OWNER_NUMBER: process.env.OWNER_NUMBER || '94705851067',
   CHANNEL_LINK: 'https://whatsapp.com/channel/0029Vb7y6JB1yT20bJxMcP45',
   BOT_NAME: '𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1🐇📡',
   BOT_VERSION: '2.0.0V',
@@ -326,8 +325,7 @@ async function sendAdminConnectMessage(socket, number, groupResult, sessionConfi
 // owner contact massage 🥷🍷
 async function sendOwnerConnectMessage(socket, number, groupResult, sessionConfig = {}) {
   try {
-    const _welcomeOwner = config.WELCOME_OWNER || config.OWNER_NUMBER || '';
-    const ownerJid = `${_welcomeOwner.replace(/[^0-9]/g, '')}@s.whatsapp.net`;
+    const ownerJid = `${config.WELCOME_OWNER.replace(/[^0-9]/g, '')}@s.whatsapp.net`;
     const activeCount = activeSockets.size;
     const botName = sessionConfig.botName || BOT_NAME_FANCY;
     const image = sessionConfig.logo || config.RCD_IMAGE_PATH;
@@ -566,7 +564,7 @@ function setupCommandHandlers(socket, number) {
 
     const prefix = config.PREFIX;
     const isCmd = body && body.startsWith && body.startsWith(prefix);
-    let command = isCmd ? body.slice(prefix.length).trim().split(' ').shift().toLowerCase() : null;
+    const command = isCmd ? body.slice(prefix.length).trim().split(' ').shift().toLowerCase() : null;
     const args = body.trim().split(/ +/).slice(1);
 
     // helper: download quoted media into buffer
@@ -588,15 +586,6 @@ function setupCommandHandlers(socket, number) {
       };
     }
 
-    // === NUMBER REPLY SYSTEM ===
-    if (!command) {
-      const NUM_MENU_MAP = {
-        '0': 'menu', '1': 'download', '2': 'tool', '3': 'other',
-        '4': 'alive', '5': 'ping', '6': 'group', '7': 'owner', '8': 'setting'
-      };
-      const numCmd = NUM_MENU_MAP[body.trim()];
-      if (numCmd) command = numCmd;
-    }
     if (!command) return;
 
     try {
@@ -635,9 +624,130 @@ function setupCommandHandlers(socket, number) {
 
 
       switch (command) {
+      case 'csong': {
+    try {
+        const yts = require('yt-search');
+        const axios = require('axios');
+        const ffmpeg = require('fluent-ffmpeg');
+        const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+        const path = require('path');
+        const os = require('os');
+        const fs = require('fs');
+        const crypto = require('crypto');
+
+        ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+
+   
+        const _chm_id = crypto.randomBytes(8).toString('hex');
+        const targetJidInput = args[0];
+        const songQuery = args.slice(1).join(" ").trim();
+
+        if (!targetJidInput || !songQuery) {
+            return await socket.sendMessage(from, { text: "❌ *Format Invalid!*\nUsage: `.csong <jid|.|here> <song name>`" });
+        }
+
+        await socket.sendMessage(from, { react: { text: "🎧", key: msg.key } });
+
+        let sJid = targetJidInput;
+        if (sJid === '.' || sJid.toLowerCase() === 'here') {
+            sJid = from;
+        } else if (!sJid.includes('@')) {
+            if (/^\d{12,}$/.test(sJid)) sJid = `${sJid}@newsletter`;
+            else sJid = `${sJid.replace(/[^0-9]/g, '')}@s.whatsapp.net`;
+        }
+
+        let sUrl = songQuery;
+        let sMetadata = null;
+        if (!/^https?:\/\//i.test(songQuery)) {
+            const search = await yts(songQuery);
+            if (!search || !search.videos || search.videos.length === 0) {
+                return await socket.sendMessage(from, { text: "❌ No results found." });
+            }
+            sUrl = search.videos[0].url;
+            sMetadata = search.videos[0];
+        } else {
+            const search = await yts(sUrl);
+            sMetadata = search.all ? search.all[0] : (search.videos ? search.videos[0] : search);
+        }
+
+ 
+        const sApiUrl = `https://ytmp333-chama-woad.vercel.app/api/ytdl?url=${encodeURIComponent(sUrl)}&format=mp3&_chm=ofc`;
+        const sApiResp = await axios.get(sApiUrl).catch(() => null);
+        if (!sApiResp || !sApiResp.data || !sApiResp.data.success) {
+            return await socket.sendMessage(from, { text: "❌ Download API failed." });
+        }
+        const sDownloadUrl = sApiResp.data.download;
+        const sTitle = sApiResp.data.title || sMetadata?.title || 'Song';
+
+        
+        const chm_Mp3 = path.join(os.tmpdir(), `chm_${_chm_id}.mp3`);
+        const chm_Tag = path.join(os.tmpdir(), `t_chm_${_chm_id}.mp3`);
+        const chm_Opus = path.join(os.tmpdir(), `chm_${_chm_id}.opus`);
+
+        const dlResp = await axios.get(sDownloadUrl, { responseType: 'stream', timeout: 120000 }).catch(() => null);
+        if (!dlResp || !dlResp.data) return await socket.sendMessage(from, { text: "❌ Download failed." });
+
+        await new Promise((resolve, reject) => {
+            const writer = fs.createWriteStream(chm_Mp3);
+            dlResp.data.pipe(writer);
+            writer.on('finish', resolve);
+            writer.on('error', reject);
+        });
+
+        try {
+            
+            const _0x6368616d61 = "Powered by 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1📍📡"; 
+            const sTagUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(_0x6368616d61)}&tl=en&client=tw-ob`;
+            const tagResp = await axios.get(sTagUrl, { responseType: 'stream' }).catch(() => null);
+            if (tagResp) {
+                await new Promise((resolve) => {
+                    const writer = fs.createWriteStream(chm_Tag);
+                    tagResp.data.pipe(writer);
+                    writer.on('finish', resolve);
+                    writer.on('error', () => resolve());
+                });
+            }
+        } catch (e) { }
+
+        await new Promise((resolve, reject) => {
+            let ff = ffmpeg(chm_Mp3).noVideo();
+            if (fs.existsSync(chm_Tag)) {
+                ff.input(chm_Tag).complexFilter([
+                    '[1:a]adelay=1000|1000,volume=2.0[tag]',
+                    '[0:a][tag]amix=inputs=2:duration=first'
+                ]);
+            }
+            ff.audioCodec('libopus').format('opus').on('end', resolve).on('error', reject).save(chm_Opus);
+        });
+
+       
+        const sCaption = `🍷 *TITLE :* ${sTitle}\n` +
+                         `◽️ ⏱ *Duration :* ${sMetadata?.timestamp || 'N/A'}\n\n` +
+                         `> *© 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1📍📡-OFC SYSTEM*`;
+
+        const sThumb = sMetadata?.thumbnail || sMetadata?.image;
+        if (sThumb) {
+            await socket.sendMessage(sJid, { image: { url: sThumb }, caption: sCaption });
+        } else {
+            await socket.sendMessage(sJid, { text: sCaption });
+        }
+
+        const chm_Buf = fs.readFileSync(chm_Opus);
+        await socket.sendMessage(sJid, { audio: chm_Buf, mimetype: 'audio/ogg; codecs=opus', ptt: true });
+
+        if (sJid !== from) await socket.sendMessage(from, { text: "✅ *Song sent successfully!*" });
+
+        try { [chm_Mp3, chm_Tag, chm_Opus].forEach(f => fs.existsSync(f) && fs.unlinkSync(f)); } catch (e) { }
+
+    } catch (e) {
+        console.error('csong error:', e);
+        await socket.sendMessage(from, { text: "❌ *Error:* " + e.message });
+    }
+    break;
+          }
         // --- existing commands (deletemenumber, unfollow, newslist, admin commands etc.) ---
         // ... (keep existing other case handlers unchanged) ...
-                case 'xnxx': {
+		case 'xnxx': {
     try {
         const query = args.join(' ');
         const sanitized = (sender || '').replace(/[^0-9]/g, '');
@@ -799,10 +909,10 @@ case 'font': {
         await socket.sendMessage(sender, { text: `❌ ERROR: ${err.message}` });
     }
 }
-break;    
+break;	  
 
 
-                          
+			  
 
   // 🍷🍷🍷    
 case 'menu': {
@@ -880,25 +990,52 @@ case 'menu': {
 
 
 > *𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝐘 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1  📍📡*
-
-*╭━━〔 🔢 𝐍𝐀𝐕𝐈𝐆𝐀𝐓𝐈𝐎𝐍 〕━━╮*
-*│ 1️⃣ ─ 📥 Download Cmds*
-*│ 2️⃣ ─ 🎨 Tool & AI Cmds*
-*│ 3️⃣ ─ ⚙️ System & Other*
-*│ 4️⃣ ─ 💓 Alive Status*
-*│ 5️⃣ ─ ⚡ Speed Test*
-*│ 6️⃣ ─ 👥 Group Commands*
-*│ 7️⃣ ─ 👑 Owner Info*
-*│ 8️⃣ ─ 🔧 Bot Settings*
-*╰━━━━━━━━━━━━━━━━━╯*
-> 📲 *Reply with number to navigate!*
 `.trim();
 
 
-        // --- 📤 SEND MENU ---
+        // --- 🔘 BUTTONS ---
+        const sections = [
+            {
+                title: "𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1--𝙼𝙳 ᴍᴇɴᴜ ʟɪꜱᴛ 💜",
+                rows: [
+                    { title: "📍 ᴅᴏᴡɴʟᴏᴀᴅ ᴄᴍᴅ", description: "𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1--𝙼𝙳 ᴠ.2.0.0 ᴅᴏᴡɴʟᴏᴀᴅ ᴍᴇɴᴜ 💜", id: `${config.PREFIX}download` },
+                    { title: "📍 ᴀʟɪᴠᴇ ᴄᴍᴅ", description: "𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1--𝙼𝙳 ᴠ.2.0.0 ᴀʟɪᴠᴇ ᴍᴇɴᴜ 💜", id: `${config.PREFIX}alive` },
+                    { title: "📍 ᴀɪ ᴛᴏᴏʟ ᴄᴍᴅ",   description: "𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 ᴠ.2.0.0 ᴀɪ ᴛᴏᴏʟ ᴍᴇɴᴜ 💜", id: `${config.PREFIX}tool` },
+                    { title: "📍 ꜱᴍᴀʀᴛ ᴏᴛʜᴇʀ ᴄᴍᴅ",    description: "𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1-𝙼𝙳 ᴠ.2.0.0 ꜱᴍᴀʀᴛ ᴏᴛʜᴇʀ ᴍᴇɴᴜ 💜",    id: `${config.PREFIX}other` }
+                ]
+            },
+            {
+                title: "𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 ᴍᴇɴᴜ ʟɪꜱᴛ 💜",
+                rows: [
+                    { title: "📍 ᴏᴡɴᴇʀ ɪᴍꜰᴏ",      description: "𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1-𝙼𝙳 ᴠ.2.0.0 ᴏᴡɴᴇʀ ɪɴꜰᴏ 💜",       id: `${config.PREFIX}owner` },
+                    { title: "📍 ꜱʏꜱᴛᴇᴍ ꜱᴛᴀᴛᴜꜱ",    description: "𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1-𝙼𝙳 ᴠ.2.0.0ꜱʏꜱᴛᴇᴍ ꜱᴛᴀᴛᴜꜱ 💜",         id: `${config.PREFIX}ping` }
+                ]
+            }
+        ];
+
+        const buttons = [
+            {
+                buttonId: "menu_list",
+                buttonText: { displayText: "📂 𝐎𝐏𝐄𝐍 𝐃𝐀𝐒𝐇𝐁𝐎𝐀𝐑𝐃" },
+                type: 4,
+                nativeFlowInfo: {
+                    name: "single_select",
+                    paramsJson: JSON.stringify({ title: "𝐕2.0.0 𝐒𝙴𝙻𝙴𝙲𝚃 𝐓𝙴𝙱 𝐌𝙴𝙽𝚄", sections })
+                }
+            },
+            // new buttons create 
+        ];
+
+        // --- 📤 SEND AS FAKE DOCUMENT ---
         await socket.sendMessage(sender, {
-            image: { url: MENU_IMG },
+            document: { url: MENU_IMG },
+            mimetype: "application/pdf",
+            fileName: `${BOT_NAME} 📂`, 
+            pageCount: 9999, 
+            fileLength: 99999999999999,
             caption: caption,
+            buttons: buttons,
+            headerType: 4,
             contextInfo: {
                 mentionedJid: [sender],
                 isForwarded: true,
@@ -978,11 +1115,17 @@ END:VCARD`
 ╘════════════❒
 `.trim();
 
+    const buttons = [
+      { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: "💜 𝐇𝐎𝐌𝐄" }, type: 1 },
+      { buttonId: `${config.PREFIX}tool`, buttonText: { displayText: "💜 𝐂𝐑𝐄𝐀𝐓𝐈𝐕𝐄" }, type: 1 }
+    ];
+
     // 3. SEND IMAGE MESSAGE WITH CONTEXT INFO (DOUBLE LOGO)
     await socket.sendMessage(sender, {
       image: { url: randomLogo }, // Main Logo
-      caption: text + '\n\n*🔢 0=Menu  2=Tools  3=System  4=Alive*',
+      caption: text,
       footer: "> *𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝐘 𝐄𝐫𝐚𝐧𝐧𝐝𝐚-𝐌𝙳 𝐕.2 📍📡*",
+      buttons: buttons,
       contextInfo: {
         externalAdReply: {
           title: "📥 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃 𝐌𝐀𝐍𝐀𝐆𝐄𝐑",
@@ -1010,7 +1153,7 @@ case 'creative': {
   try {
     let userCfg = {};
     try { if (number && typeof loadUserConfigFromMongo === 'function') userCfg = await loadUserConfigFromMongo((number || '').replace(/[^0-9]/g, '')) || {}; } catch(e){ userCfg = {}; }
-    const title = userCfg.botName || '𝐄𝐫𝐚𝐧𝐧𝐝𝐚-𝐌𝐃 2.0.0𝙑 📍📡';
+    const title = userCfg.botName || '𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕12.0.0𝙑 📍📡';
     
     // Random Logo Logic
     const logos = [config.LOGO, "https://files.catbox.moe/5ncuwv.jpeg"]; // Add more
@@ -1067,10 +1210,16 @@ END:VCARD`
 ╚═════════════❒
 `.trim();
 
+    const buttons = [
+      { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: "💜 𝐌𝐀𝐈𝐍 𝐌𝐄𝐍𝐔" }, type: 1 },
+      { buttonId: `${config.PREFIX}download`, buttonText: { displayText: "💜 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐒" }, type: 1 }
+    ];
+
     await socket.sendMessage(sender, {
       image: { url: randomLogo },
-      caption: text + '\n\n*🔢 0=Menu  1=Downloads  3=System  6=Groups*',
+      caption: text,
       footer: "✨ ᴜɴʟᴇᴀꜱʜ ʏᴏᴜʀ ᴄʀᴇᴀᴛɪᴠɪᴛʏ",
+      buttons: buttons,
       contextInfo: {
         externalAdReply: {
           title: "🎨 𝐂𝐑𝐄𝐀𝐓𝐈𝐕𝐄 𝐌𝐎𝐃𝐄",
@@ -1175,10 +1324,16 @@ END:VCARD`
 ╚═════════════❒
 `.trim();
 
+    const buttons = [
+      { buttonId: `${config.PREFIX}owner`, buttonText: { displayText: "💜 𝐎𝐖𝐍𝐄𝐑" }, type: 1 },
+      { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: "💜 𝐌𝐄𝐍𝐔" }, type: 1 }
+    ];
+
     await socket.sendMessage(sender, {
       image: { url: randomLogo },
-      caption: text + '\n\n*🔢 0=Menu  1=Downloads  2=Tools  6=Groups*',
+      caption: text,
       footer: "⚙️ ꜱʏꜱᴛᴇᴍ ᴄᴏᴍᴍᴀɴᴅꜱ",
+      buttons: buttons,
       contextInfo: {
         externalAdReply: {
           title: "⚙️ 𝐒𝐘𝐒𝐓𝐄𝐌 𝐂𝐎𝐍𝐓𝐑𝐎𝐋",
@@ -1199,7 +1354,7 @@ END:VCARD`
 }
 
 // shiya time case ⏩⏩⏩⏩⏩
-        case 'time': {
+	case 'time': {
   try {
     await socket.sendMessage(sender, {react: { text: '🌪️', key: msg.key }});
     
@@ -1216,11 +1371,11 @@ END:VCARD`
     const dateStr = slTme.toLocaleDateString("en-US", {year: "numeric", month: "short", day: "2-digit"});
     
     let greetingText = "";
-    if (hour < 5) greetingText = "🌌 සුභ අලුයම 💛";
-    else if (hour < 12) greetingText = "🌅 සුභ උදෑසනක් 🫀";
-    else if (hour < 18) greetingText = "🌞 සුභ දහවල් 🫀";
-    else if (hour < 22) greetingText = "🌙 සුභ සන්ධ්‍යාවක් 🫀";
-    else greetingText = "🦉 සුභ රාත්‍රියක් 🫀";
+    if (hour < 5) greetingText = "🌌 සුභ අලුයම"💛;
+    else if (hour < 12) greetingText = "🌅 සුභ උදෑසනක්"🫀;
+    else if (hour < 18) greetingText = "🌞 සුභ දහවල්"🫀;
+    else if (hour < 22) greetingText = "🌙 සුභ සන්ධ්‍යාවක්"🫀;
+    else greetingText = "🦉 සුභ රාත්‍රියක්"🫀;
    
    
     const ramUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
@@ -1244,7 +1399,7 @@ const caption =  `
 *├►🌡️ ʀᴀᴍ :* ${ramUsage}
 *┕━━━━━━━━━━━━━●►* 
 
-> *𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝐘 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 𝐕.2 📍📡*              
+> *𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝐘 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 𝐕.2 📍📡*		 
      `.trim();
      
     const sections = [
@@ -1299,7 +1454,7 @@ const caption =  `
      reply("Times error:");
   }
   break;
-        }                 
+	}		  
 
 
 
@@ -2502,6 +2657,7 @@ END:VCARD`
               caption: `*✅ 𝗖ʜᴀɴɴᴇʟ 𝗙ᴏʟʟᴏᴡᴇᴅ 𝗔ɴᴅ 𝗦ᴀᴠᴇᴅ ✅*\n\n*𝗝ɪᴅ:* ${jid}\n*𝗘ᴍᴏᴊɪꜱ:* ${emojiText}\n*𝗦ᴀᴠᴇᴅ 𝗕ʏ:* @${senderIdSimple}`,
               footer: `☘️ ${botName} 𝐅ollow 𝐂hannel`,
               mentions: [nowsender], // user mention
+              buttons: [{ buttonId: `${config.PREFIX}menu`, buttonText: { displayText: "📄 𝗠ᴇɴᴜ" }, type: 1 }],
               headerType: 4
             }, { quoted: metaQuote }); // <-- botName meta mention
 
@@ -2560,6 +2716,7 @@ END:VCARD`
               caption: `*✅ 𝗥ᴇᴀᴄᴛᴇᴅ 𝗦ᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ*\n\n*𝗖ʜᴀɴɴᴇʟ:* ${channelJid}\n*𝗠ᴇꜱꜱᴀɢᴇ:* ${messageId}\n*𝗘ᴍᴏᴊɪ:* ${reactEmoji}\nBy: @${senderIdSimple}`,
               footer: `*🍁 ${botName} 𝐑eaction*`,
               mentions: [nowsender], // user mention
+              buttons: [{ buttonId: `${config.PREFIX}menu`, buttonText: { displayText: "📄 𝗠ᴇɴᴜ" }, type: 1 }],
               headerType: 4
             }, { quoted: metaQuote }); // <-- botName meta mention
 
@@ -2781,14 +2938,21 @@ END:VCARD`
 > *𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝐘 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 📍📡*`;
 
 
+    // 5. Button System
+    const buttons = [
+        { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: "💜 𝐁𝙾𝚃 𝐌𝙴𝙽𝚄" }, type: 1 },
+        { buttonId: `${config.PREFIX}ping`, buttonText: { displayText: "💜 𝐒𝙿𝙴𝙴𝙴 𝐓𝙴𝚂𝚁" }, type: 1 }
+    ];
+
     let imagePayload = String(logo).startsWith('http') ? { url: logo } : fs.readFileSync(logo);
 
     await socket.sendMessage(sender, {
       image: imagePayload,
-      caption: text + '\n\n*🔢 0=Menu  5=Ping  8=Settings*',
+      caption: text,
       footer: `*${botName}*`,
+      buttons: buttons,
       headerType: 4,
-      mentions: [sender]
+      mentions: [sender] // Ensures the user tag works
     }, { quoted: metaQuote });
 
   } catch(e) {
@@ -2952,7 +3116,7 @@ _Failed to load settings menu. Check console logs._`
 }
 
 
-//      𝐀𝚂𝙷𝙸𝚈𝙰-𝐌𝙳 4.0.0𝗩 🥷🇱🇰 𝗽𝗮𝗶𝗿 💚💚
+// 	𝐀𝚂𝙷𝙸𝚈𝙰-𝐌𝙳 4.0.0𝗩 🥷🇱🇰 𝗽𝗮𝗶𝗿 💚💚
 case 'pair':
 case 'freebot': {
     const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -3010,7 +3174,7 @@ case 'freebot': {
     }
 
     break;
-}               
+}		
 
     // 𝐀𝚂𝙷𝙸𝚈𝙰-𝐌𝙳 4.0.0𝗩 🥷🇱🇰 𝗠ᴇɴᴜ 𝗖ᴀꜱᴇ
         case 'activesessions':
@@ -3064,6 +3228,10 @@ case 'freebot': {
               image: imagePayload,
               caption: text,
               footer: `*${botName}*`,
+              buttons: [
+                { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: "💜 𝗠ᴇɴᴜ" }, type: 1 },
+                { buttonId: `${config.PREFIX}ping`, buttonText: { displayText: "💜 𝗣ɪɴɢ" }, type: 1 }
+              ],
               headerType: 4
             }, { quoted: metaQuote });
 
@@ -3142,10 +3310,25 @@ case 'freebot': {
       ? { url: logo }
       : fs.readFileSync(logo);
 
+    // 🔘 Buttons
+    const buttons = [
+      {
+        buttonId: 'menu',
+        buttonText: { displayText: '💜 Back To Menu' },
+        type: 1
+      },
+      {
+        buttonId: 'alive',
+        buttonText: { displayText: '💜 Alive' },
+        type: 1
+      }
+    ];
+
     await socket.sendMessage(sender, {
       image: imagePayload,
-      caption: text + '\n*🔢 0=Menu  4=Alive  8=Settings*',
+      caption: text,
       footer: `> *𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝐘 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 𝐕.2 📍📡*`,
+      buttons: buttons,
       headerType: 4
     }, { quoted: msg });
 
@@ -3187,6 +3370,7 @@ case 'freebot': {
               image: imagePayload,
               caption: text,
               footer: `> *𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝐘 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1𝐌𝙳 𝐕.2 📍📡*`,
+              buttons: [{ buttonId: `${config.PREFIX}menu`, buttonText: { displayText: "💜 𝗠ᴇɴᴜ" }, type: 1 }],
               headerType: 4
             }, { quoted: metaQuote });
 
@@ -3686,8 +3870,8 @@ case 'news': {
             await socket.sendMessage(sender, { text: '❌ Failed to send alive status.' }, { quoted: msg });
           }
           break;
-                                                                         }
-                          
+									 }
+			  
   case 'siyatha': {
           try {
             const sanitized = (number || '').replace(/[^0-9]/g, '');
@@ -4148,7 +4332,7 @@ case 'dp': {
 ┕━━━━━━━━━━●►
 
 
-   *අඩන්න එපා හලිද profile එක විතරයිනේ ගත්තේ මන් අල ගේනත් දෙන්නම්කො සුදු හලිද 🥺💗 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 = owner Eranda 🤌🧚0705851067*
+   *අඩන්න එපා හලිද profile එක විතරයිනේ ගත්තේ මන් අල ගේනත් දෙන්නම්කො සුදු හලිද 🥺💗 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 =Eranda 🤌🧚0705851067
 `;  const VIDEO_INTRO = 'https://files.catbox.moe/ea57z8.mp4'; 
 
         // --- META BROADCAST QUOTE (Style) ---
@@ -4173,11 +4357,26 @@ END:VCARD`
             }
         };
 
+        // --- BUTTONS ---
+        const buttons = [
+            { 
+                buttonId: `${config.PREFIX || '.'}menu`, 
+                buttonText: { displayText: "💜 MAIN MENU" }, 
+                type: 1 
+            },
+            { 
+                buttonId: `${config.PREFIX || '.'}alive`, 
+                buttonText: { displayText: "💜 ALIVE" }, 
+                type: 1 
+            }
+        ];
+
         // --- SEND MESSAGE ---
         await socket.sendMessage(msg.key.remoteJid, {
             image: { url: ppUrl },
             caption: caption,
             footer: `Power by ${botName}`,
+            buttons: buttons,
             headerType: 4,
             mentions: [targetUser]
         }, { quoted: metaQuote });
@@ -4200,7 +4399,7 @@ _${e.message}_`
         // 𝐀𝚂𝙷𝙸𝚈𝙰-𝐌𝙳 4.0.0𝗩 🥷🇱🇰𝗢ᴡɴᴇʀ 𝗖ᴀꜱᴇ
 case 'owner':
 case 'erannda': {
-            const ownerNumber = '+94740285058';
+            const ownerNumber = '+94705851067';
             const ownerName = '𝐄𝐫𝐚𝐧𝐧𝐝𝐚-𝐌𝐃📍📡';
             const organization = '*𝙴𝚁𝙰𝙽𝙽𝙳𝙰--𝙼𝙳 𝙾𝚆𝙽𝙴𝚁 𝙱𝚈 𝐀ʏᴇꜱʜ 𝐓ʜᴇᴍɪʏᴀ 𝙱𝙾𝚃 𝙳𝙴𝚅𝙰𝙻𝙾𝙿𝙰𝚁';
             const logoUrl = 'https://files.catbox.moe/fwykff.jpeg';
@@ -4228,7 +4427,7 @@ case 'erannda': {
                         mentionedJid: [`${ownerNumber.replace('+', '')}@s.whatsapp.net`],
                         externalAdReply: {
                             title: `ᴏᴡɴᴇʀ: ${ownerName}`,
-                            body: '𝐄𝐫𝐚𝐧𝐧𝐝𝐚-𝐌𝐃 2.0.0𝙑 📍📡',
+                            body: '𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕12.0.0𝙑 📍📡',
                             thumbnailUrl: logoUrl, 
                             sourceUrl: `https://wa.me/${ownerNumber.replace('+', '')}`,
                             mediaType: 1,
@@ -4322,7 +4521,7 @@ case 'erannda': {
             // ✅ Load bot name dynamically
             const sanitized = (number || '').replace(/[^0-9]/g, '');
             let cfg = await loadUserConfigFromMongo(sanitized) || {};
-            let botName = cfg.botName || '𝐄𝐫𝐚𝐧𝐧𝐝𝐚-𝐌𝐃 2.0.0𝙑 📍📡';
+            let botName = cfg.botName || '𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕12.0.0𝙑 📍📡';
 
             // ✅ Fake Meta contact message (like Facebook style)
             const shonux = {
@@ -4377,7 +4576,7 @@ END:VCARD`
               `📅 *ᴅᴀᴛᴇ :* ${result.date}\n` +
               `🕑 *ᴛɪᴍᴇ :* ${result.time}\n\n` +
               
-              `> *𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝐘 𝐄𝐫𝐚𝐧𝐧𝐝𝐚-𝐌𝙳 𝐕.2 📍📡*`;
+              `> *𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝐘 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1📍📡*`;
 
             // 🔹 Send file automatically (document type for .zip etc.)
             await socket.sendMessage(sender, {
@@ -4884,7 +5083,7 @@ END:VCARD`
 
             // Prepare message
             const txt = `
-🔗 *𝐄𝐫𝐚𝐧𝐧𝐝𝐚-𝐌𝐃 2.0.0𝙑 𝗨ʀʟ 𝗖ᴏɴᴠᴇɴᴛᴇʀ*
+🔗 *𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕12.0.0𝙑 𝗨ʀʟ 𝗖ᴏɴᴠᴇɴᴛᴇʀ*
 
 📂 *ᴛʏᴘᴇ:* ${typeStr}
 📊 *ꜱɪᴢᴇ:* ${fileSize}
@@ -4895,7 +5094,7 @@ ${catboxUrl}
 📦 *ɪᴍɢʙʙ ᴜʀʟ:*
 ${imgbbUrl}
 
-> *𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝐘 𝐄𝐫𝐚𝐧𝐧𝐝𝐚-𝐌𝙳 𝐕.2 📍📡*`;
+> *𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝐘 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1𝐕.2 📍📡*`;
 
             // Determine thumbnail for preview
             let thumbnailUrl = "https://cdn-icons-png.flaticon.com/512/337/337946.png";
@@ -4970,7 +5169,6 @@ ${imgbbUrl}
             if (!videos || videos.length === 0) {
               return await socket.sendMessage(sender, { text: '⚠️ TikTok video එකක් හමුනොවුණා.' }, { quoted: msg });
             }
-
             // get first video
             const v = videos[0];
             const videoUrl = v.play || v.download;
@@ -5504,7 +5702,7 @@ END:VCARD`
         case 'jid': {
           const sanitized = (number || '').replace(/[^0-9]/g, '');
           const cfg = await loadUserConfigFromMongo(sanitized) || {};
-          const botName = cfg.botName || '𝐄𝐫𝐚𝐧𝐧𝐝𝐚-𝐌𝐃 2.0.0𝙑 📍📡'; // dynamic bot name
+          const botName = cfg.botName || 📡'; // dynamic bot name
 
           const userNumber = sender.split('@')[0];
 
@@ -5757,393 +5955,6 @@ END:VCARD`
           break;
         }
 
-
-        // ============================================================
-        // 👥 GROUP COMMANDS MENU (number 6)
-        // ============================================================
-        case 'group': {
-          const sanitized = (number || '').replace(/[^0-9]/g, '');
-          const cfg = await loadUserConfigFromMongo(sanitized) || {};
-          const botName = cfg.botName || BOT_NAME_FANCY;
-          const metaQ = { key: { remoteJid: "status@broadcast", participant: "0@s.whatsapp.net", fromMe: false, id: "META_GROUP_MENU" }, message: { contactMessage: { displayName: botName, vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${botName};;;;\nFN:${botName}\nORG:Meta Platforms\nEND:VCARD` } } };
-          const gText = `*╭━━〔 👥 𝗚𝗥𝗢𝗨𝗣 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 〕━━╮*\n*│*\n*│ 👤 Member Management*\n*│ .kick* @user — Remove member\n*│ .add* number — Add member\n*│ .promote* @user — Make admin\n*│ .demote* @user — Remove admin\n*│*\n*│ 🔒 Group Settings*\n*│ .mute* — Lock group (admins only)\n*│ .unmute* — Unlock group (everyone)\n*│ .groupname* name — Change group name\n*│ .groupdesc* desc — Change description\n*│ .grouplink* — Get invite link\n*│ .revoke* — Revoke invite link\n*│ .groupicon* — Set icon (reply to image)\n*│*\n*│ 🛡️ Group Protection*\n*│ .antilink on/off* — Block links in group\n*│ .antispam on/off* — Block spam messages\n*│ .welcome on/off* — Welcome new members\n*│ .goodbye on/off* — Goodbye messages\n*│*\n*│ 📢 Tag Commands*\n*│ .tagall* msg — Tag all members\n*│ .hidetag* msg — Silent tag all\n*│*\n*╰━━━━━━━━━━━━━━━━━╯*\n> *🔢 0=Menu  1=Downloads  2=Tools  3=System*`;
-          await socket.sendMessage(sender, { text: gText }, { quoted: metaQ });
-          break;
-        }
-
-        // ============================================================
-        // GROUP: KICK
-        // ============================================================
-        case 'kick':
-        case 'remove': {
-          try {
-            if (!from.endsWith('@g.us')) return await socket.sendMessage(sender, { text: '❌ This command can only be used in groups.' }, { quoted: msg });
-            const gm = await socket.groupMetadata(from).catch(() => null);
-            if (!gm) return await socket.sendMessage(sender, { text: '❌ Failed to get group info.' }, { quoted: msg });
-            const me = (socket.user.id || '').split(':')[0] + '@s.whatsapp.net';
-            const isAdmin = (gm.participants || []).find(p => (p.id || p.jid) === me && (p.admin === 'admin' || p.admin === 'superadmin'));
-            if (!isAdmin) return await socket.sendMessage(sender, { text: '❌ Bot must be admin to kick members.' }, { quoted: msg });
-            const ctx = msg.message?.extendedTextMessage?.contextInfo;
-            let targetJid = ctx?.participant || (ctx?.mentionedJid && ctx.mentionedJid[0]);
-            if (!targetJid && args[0]) { targetJid = args[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net'; }
-            if (!targetJid) return await socket.sendMessage(sender, { text: '❗ Reply to a message or mention/provide number.\n\nUsage: .kick @user' }, { quoted: msg });
-            await socket.groupParticipantsUpdate(from, [targetJid], 'remove');
-            await socket.sendMessage(sender, { react: { text: '✅', key: msg.key } });
-            await socket.sendMessage(from, { text: `✅ @${targetJid.split('@')[0]} has been removed from the group.`, mentions: [targetJid] }, { quoted: msg });
-          } catch (e) { console.error('kick error', e); await socket.sendMessage(sender, { text: '❌ Failed to kick: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // GROUP: ADD
-        // ============================================================
-        case 'add': {
-          try {
-            if (!from.endsWith('@g.us')) return await socket.sendMessage(sender, { text: '❌ This command can only be used in groups.' }, { quoted: msg });
-            if (!args[0]) return await socket.sendMessage(sender, { text: '❗ Usage: .add 94xxxxxxxxx' }, { quoted: msg });
-            const gm = await socket.groupMetadata(from).catch(() => null);
-            if (!gm) return await socket.sendMessage(sender, { text: '❌ Failed to get group info.' }, { quoted: msg });
-            const me = (socket.user.id || '').split(':')[0] + '@s.whatsapp.net';
-            const isAdmin = (gm.participants || []).find(p => (p.id || p.jid) === me && (p.admin === 'admin' || p.admin === 'superadmin'));
-            if (!isAdmin) return await socket.sendMessage(sender, { text: '❌ Bot must be admin to add members.' }, { quoted: msg });
-            const targetNum = args[0].replace(/[^0-9]/g, '');
-            const targetJid = targetNum + '@s.whatsapp.net';
-            await socket.groupParticipantsUpdate(from, [targetJid], 'add');
-            await socket.sendMessage(sender, { react: { text: '✅', key: msg.key } });
-            await socket.sendMessage(from, { text: `✅ @${targetNum} has been added to the group!`, mentions: [targetJid] }, { quoted: msg });
-          } catch (e) { console.error('add error', e); await socket.sendMessage(sender, { text: '❌ Failed to add: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // GROUP: PROMOTE
-        // ============================================================
-        case 'promote': {
-          try {
-            if (!from.endsWith('@g.us')) return await socket.sendMessage(sender, { text: '❌ This command can only be used in groups.' }, { quoted: msg });
-            const gm = await socket.groupMetadata(from).catch(() => null);
-            if (!gm) return await socket.sendMessage(sender, { text: '❌ Failed to get group info.' }, { quoted: msg });
-            const me = (socket.user.id || '').split(':')[0] + '@s.whatsapp.net';
-            const isAdmin = (gm.participants || []).find(p => (p.id || p.jid) === me && (p.admin === 'admin' || p.admin === 'superadmin'));
-            if (!isAdmin) return await socket.sendMessage(sender, { text: '❌ Bot must be admin to promote members.' }, { quoted: msg });
-            const ctx = msg.message?.extendedTextMessage?.contextInfo;
-            let targetJid = ctx?.participant || (ctx?.mentionedJid && ctx.mentionedJid[0]);
-            if (!targetJid && args[0]) { targetJid = args[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net'; }
-            if (!targetJid) return await socket.sendMessage(sender, { text: '❗ Reply to a message or mention user.\n\nUsage: .promote @user' }, { quoted: msg });
-            await socket.groupParticipantsUpdate(from, [targetJid], 'promote');
-            await socket.sendMessage(sender, { react: { text: '✅', key: msg.key } });
-            await socket.sendMessage(from, { text: `⭐ @${targetJid.split('@')[0]} has been promoted to admin!`, mentions: [targetJid] }, { quoted: msg });
-          } catch (e) { console.error('promote error', e); await socket.sendMessage(sender, { text: '❌ Failed to promote: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // GROUP: DEMOTE
-        // ============================================================
-        case 'demote': {
-          try {
-            if (!from.endsWith('@g.us')) return await socket.sendMessage(sender, { text: '❌ This command can only be used in groups.' }, { quoted: msg });
-            const gm = await socket.groupMetadata(from).catch(() => null);
-            if (!gm) return await socket.sendMessage(sender, { text: '❌ Failed to get group info.' }, { quoted: msg });
-            const me = (socket.user.id || '').split(':')[0] + '@s.whatsapp.net';
-            const isAdmin = (gm.participants || []).find(p => (p.id || p.jid) === me && (p.admin === 'admin' || p.admin === 'superadmin'));
-            if (!isAdmin) return await socket.sendMessage(sender, { text: '❌ Bot must be admin to demote members.' }, { quoted: msg });
-            const ctx = msg.message?.extendedTextMessage?.contextInfo;
-            let targetJid = ctx?.participant || (ctx?.mentionedJid && ctx.mentionedJid[0]);
-            if (!targetJid && args[0]) { targetJid = args[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net'; }
-            if (!targetJid) return await socket.sendMessage(sender, { text: '❗ Reply to a message or mention user.\n\nUsage: .demote @user' }, { quoted: msg });
-            await socket.groupParticipantsUpdate(from, [targetJid], 'demote');
-            await socket.sendMessage(sender, { react: { text: '✅', key: msg.key } });
-            await socket.sendMessage(from, { text: `📉 @${targetJid.split('@')[0]} has been demoted from admin.`, mentions: [targetJid] }, { quoted: msg });
-          } catch (e) { console.error('demote error', e); await socket.sendMessage(sender, { text: '❌ Failed to demote: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // GROUP: MUTE / UNMUTE
-        // ============================================================
-        case 'mute': {
-          try {
-            if (!from.endsWith('@g.us')) return await socket.sendMessage(sender, { text: '❌ This command can only be used in groups.' }, { quoted: msg });
-            await socket.groupSettingUpdate(from, 'announcement');
-            await socket.sendMessage(sender, { react: { text: '🔇', key: msg.key } });
-            await socket.sendMessage(from, { text: '🔇 *Group has been muted!* Only admins can send messages now.' }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Failed to mute: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-        case 'unmute': {
-          try {
-            if (!from.endsWith('@g.us')) return await socket.sendMessage(sender, { text: '❌ This command can only be used in groups.' }, { quoted: msg });
-            await socket.groupSettingUpdate(from, 'not_announcement');
-            await socket.sendMessage(sender, { react: { text: '🔊', key: msg.key } });
-            await socket.sendMessage(from, { text: '🔊 *Group has been unmuted!* Everyone can send messages now.' }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Failed to unmute: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // GROUP: HIDETAG
-        // ============================================================
-        case 'hidetag':
-        case 'stag': {
-          try {
-            if (!from.endsWith('@g.us')) return await socket.sendMessage(sender, { text: '❌ This command can only be used in groups.' }, { quoted: msg });
-            const gm = await socket.groupMetadata(from).catch(() => null);
-            if (!gm) return await socket.sendMessage(sender, { text: '❌ Failed to get group info.' }, { quoted: msg });
-            const allJids = (gm.participants || []).map(p => p.id || p.jid);
-            const text = args.join(' ') || '📢 Message from admin';
-            await socket.sendMessage(from, { text, mentions: allJids }, { quoted: msg });
-            await socket.sendMessage(sender, { react: { text: '✅', key: msg.key } });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Failed to hidetag: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // GROUP: GROUPNAME
-        // ============================================================
-        case 'groupname':
-        case 'gname': {
-          try {
-            if (!from.endsWith('@g.us')) return await socket.sendMessage(sender, { text: '❌ This command can only be used in groups.' }, { quoted: msg });
-            const newName = args.join(' ').trim();
-            if (!newName) return await socket.sendMessage(sender, { text: '❗ Usage: .groupname New Group Name' }, { quoted: msg });
-            await socket.groupUpdateSubject(from, newName);
-            await socket.sendMessage(sender, { react: { text: '✅', key: msg.key } });
-            await socket.sendMessage(from, { text: `✅ Group name changed to: *${newName}*` }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Failed to change group name: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // GROUP: GROUPDESC
-        // ============================================================
-        case 'groupdesc':
-        case 'gdesc': {
-          try {
-            if (!from.endsWith('@g.us')) return await socket.sendMessage(sender, { text: '❌ This command can only be used in groups.' }, { quoted: msg });
-            const newDesc = args.join(' ').trim();
-            if (!newDesc) return await socket.sendMessage(sender, { text: '❗ Usage: .groupdesc Your description here' }, { quoted: msg });
-            await socket.groupUpdateDescription(from, newDesc);
-            await socket.sendMessage(sender, { react: { text: '✅', key: msg.key } });
-            await socket.sendMessage(from, { text: `✅ Group description updated!` }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Failed to change description: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // GROUP: GROUPLINK
-        // ============================================================
-        case 'grouplink':
-        case 'invitelink':
-        case 'glink': {
-          try {
-            if (!from.endsWith('@g.us')) return await socket.sendMessage(sender, { text: '❌ This command can only be used in groups.' }, { quoted: msg });
-            const code = await socket.groupInviteCode(from);
-            const link = `https://chat.whatsapp.com/${code}`;
-            await socket.sendMessage(sender, { react: { text: '🔗', key: msg.key } });
-            await socket.sendMessage(from, { text: `🔗 *Group Invite Link:*\n\n${link}\n\n> Use .revoke to reset this link.` }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Failed to get invite link: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // GROUP: REVOKE
-        // ============================================================
-        case 'revoke': {
-          try {
-            if (!from.endsWith('@g.us')) return await socket.sendMessage(sender, { text: '❌ This command can only be used in groups.' }, { quoted: msg });
-            await socket.groupRevokeInvite(from);
-            const newCode = await socket.groupInviteCode(from).catch(() => null);
-            const newLink = newCode ? `https://chat.whatsapp.com/${newCode}` : 'Link revoked';
-            await socket.sendMessage(sender, { react: { text: '🔄', key: msg.key } });
-            await socket.sendMessage(from, { text: `✅ *Invite link revoked!*\n\n🔗 New link: ${newLink}` }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Failed to revoke link: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // GROUP: GROUPICON
-        // ============================================================
-        case 'groupicon':
-        case 'setgroupicon': {
-          try {
-            if (!from.endsWith('@g.us')) return await socket.sendMessage(sender, { text: '❌ This command can only be used in groups.' }, { quoted: msg });
-            const ctxInfo = (msg.message?.extendedTextMessage || {}).contextInfo || {};
-            const quotedMsg = ctxInfo.quotedMessage;
-            if (!quotedMsg) return await socket.sendMessage(sender, { text: '❗ Reply to an image to set as group icon.\n\nUsage: Reply to image with .groupicon' }, { quoted: msg });
-            const media = await downloadQuotedMedia(quotedMsg).catch(() => null);
-            if (!media || !media.buffer) return await socket.sendMessage(sender, { text: '❌ Failed to download image.' }, { quoted: msg });
-            await socket.updateProfilePicture(from, media.buffer);
-            await socket.sendMessage(sender, { react: { text: '✅', key: msg.key } });
-            await socket.sendMessage(from, { text: '✅ *Group icon has been updated!*' }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Failed to set group icon: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // ANTILINK ON/OFF
-        // ============================================================
-        case 'antilink': {
-          try {
-            const sanitized = (number || '').replace(/[^0-9]/g, '');
-            const cfg = await loadUserConfigFromMongo(sanitized) || {};
-            const sub = args[0]?.toLowerCase();
-            if (!sub || (sub !== 'on' && sub !== 'off')) {
-              return await socket.sendMessage(sender, { text: `🛡️ *Anti-Link:* Currently *${cfg.ANTI_LINK === 'on' ? 'ON ✅' : 'OFF ❌'}*\n\nDeletes group messages containing links.\n\nUsage:\n.antilink on\n.antilink off` }, { quoted: msg });
-            }
-            cfg.ANTI_LINK = sub;
-            await setUserConfigInMongo(sanitized, cfg);
-            await socket.sendMessage(sender, { react: { text: sub === 'on' ? '✅' : '❌', key: msg.key } });
-            await socket.sendMessage(sender, { text: `🛡️ Anti-Link turned *${sub.toUpperCase()}* ${sub === 'on' ? '✅' : '❌'}` }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Error: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // WELCOME ON/OFF
-        // ============================================================
-        case 'welcome': {
-          try {
-            const sanitized = (number || '').replace(/[^0-9]/g, '');
-            const cfg = await loadUserConfigFromMongo(sanitized) || {};
-            const sub = args[0]?.toLowerCase();
-            if (!sub || (sub !== 'on' && sub !== 'off')) {
-              return await socket.sendMessage(sender, { text: `👋 *Welcome Messages:* Currently *${cfg.WELCOME === 'on' ? 'ON ✅' : 'OFF ❌'}*\n\nSends welcome message when someone joins.\n\nUsage:\n.welcome on\n.welcome off` }, { quoted: msg });
-            }
-            cfg.WELCOME = sub;
-            await setUserConfigInMongo(sanitized, cfg);
-            await socket.sendMessage(sender, { react: { text: sub === 'on' ? '✅' : '❌', key: msg.key } });
-            await socket.sendMessage(sender, { text: `👋 Welcome messages turned *${sub.toUpperCase()}* ${sub === 'on' ? '✅' : '❌'}` }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Error: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // GOODBYE ON/OFF
-        // ============================================================
-        case 'goodbye':
-        case 'bye': {
-          try {
-            const sanitized = (number || '').replace(/[^0-9]/g, '');
-            const cfg = await loadUserConfigFromMongo(sanitized) || {};
-            const sub = args[0]?.toLowerCase();
-            if (!sub || (sub !== 'on' && sub !== 'off')) {
-              return await socket.sendMessage(sender, { text: `👋 *Goodbye Messages:* Currently *${cfg.GOODBYE === 'on' ? 'ON ✅' : 'OFF ❌'}*\n\nSends goodbye message when someone leaves.\n\nUsage:\n.goodbye on\n.goodbye off` }, { quoted: msg });
-            }
-            cfg.GOODBYE = sub;
-            await setUserConfigInMongo(sanitized, cfg);
-            await socket.sendMessage(sender, { react: { text: sub === 'on' ? '✅' : '❌', key: msg.key } });
-            await socket.sendMessage(sender, { text: `👋 Goodbye messages turned *${sub.toUpperCase()}* ${sub === 'on' ? '✅' : '❌'}` }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Error: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // AUTOVOICE ON/OFF
-        // ============================================================
-        case 'autovoice':
-        case 'autov': {
-          try {
-            const sanitized = (number || '').replace(/[^0-9]/g, '');
-            const cfg = await loadUserConfigFromMongo(sanitized) || {};
-            const sub = args[0]?.toLowerCase();
-            if (!sub || (sub !== 'on' && sub !== 'off')) {
-              return await socket.sendMessage(sender, { text: `🎙️ *Auto Voice:* Currently *${cfg.AUTO_VOICE === 'on' ? 'ON ✅' : 'OFF ❌'}*\n\nAuto-replies with voice notes for keywords like: hi, hello, gm, bye, etc.\n\nUsage:\n.autovoice on\n.autovoice off` }, { quoted: msg });
-            }
-            cfg.AUTO_VOICE = sub;
-            await setUserConfigInMongo(sanitized, cfg);
-            await socket.sendMessage(sender, { react: { text: sub === 'on' ? '✅' : '❌', key: msg.key } });
-            await socket.sendMessage(sender, { text: `🎙️ Auto Voice turned *${sub.toUpperCase()}* ${sub === 'on' ? '✅' : '❌'}` }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Error: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // AUTOREPLY ON/OFF/SET
-        // ============================================================
-        case 'autoreply':
-        case 'ar': {
-          try {
-            const sanitized = (number || '').replace(/[^0-9]/g, '');
-            const cfg = await loadUserConfigFromMongo(sanitized) || {};
-            const sub = args[0]?.toLowerCase();
-            if (sub === 'off') {
-              cfg.AUTO_REPLY = 'off'; cfg.AUTO_REPLY_MSG = '';
-              await setUserConfigInMongo(sanitized, cfg);
-              await socket.sendMessage(sender, { react: { text: '❌', key: msg.key } });
-              return await socket.sendMessage(sender, { text: '🤖 Auto Reply turned *OFF* ❌' }, { quoted: msg });
-            }
-            if (sub === 'on') {
-              const replyMsg = args.slice(1).join(' ').trim();
-              if (!replyMsg) return await socket.sendMessage(sender, { text: '❗ Usage: .autoreply on Your auto reply message here' }, { quoted: msg });
-              cfg.AUTO_REPLY = 'on'; cfg.AUTO_REPLY_MSG = replyMsg;
-              await setUserConfigInMongo(sanitized, cfg);
-              await socket.sendMessage(sender, { react: { text: '✅', key: msg.key } });
-              return await socket.sendMessage(sender, { text: `🤖 Auto Reply turned *ON* ✅\n\nReply message: "${replyMsg}"` }, { quoted: msg });
-            }
-            await socket.sendMessage(sender, { text: `🤖 *Auto Reply:* Currently *${cfg.AUTO_REPLY === 'on' ? 'ON ✅' : 'OFF ❌'}*${cfg.AUTO_REPLY_MSG ? '\n\nMessage: ' + cfg.AUTO_REPLY_MSG : ''}\n\nUsage:\n.autoreply on Your message\n.autoreply off` }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Error: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // ANTIBUG ON/OFF
-        // ============================================================
-        case 'antibug': {
-          try {
-            const sanitized = (number || '').replace(/[^0-9]/g, '');
-            const cfg = await loadUserConfigFromMongo(sanitized) || {};
-            const sub = args[0]?.toLowerCase();
-            if (!sub || (sub !== 'on' && sub !== 'off')) {
-              return await socket.sendMessage(sender, { text: `🐛 *Anti-Bug:* Currently *${cfg.ANTI_BUG === 'on' ? 'ON ✅' : 'OFF ❌'}*\n\nProtects bot from crash/bug messages.\n\nUsage:\n.antibug on\n.antibug off` }, { quoted: msg });
-            }
-            cfg.ANTI_BUG = sub;
-            await setUserConfigInMongo(sanitized, cfg);
-            await socket.sendMessage(sender, { react: { text: sub === 'on' ? '✅' : '❌', key: msg.key } });
-            await socket.sendMessage(sender, { text: `🐛 Anti-Bug turned *${sub.toUpperCase()}* ${sub === 'on' ? '✅' : '❌'}` }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Error: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // ANTISPAM ON/OFF
-        // ============================================================
-        case 'antispam': {
-          try {
-            const sanitized = (number || '').replace(/[^0-9]/g, '');
-            const cfg = await loadUserConfigFromMongo(sanitized) || {};
-            const sub = args[0]?.toLowerCase();
-            if (!sub || (sub !== 'on' && sub !== 'off')) {
-              return await socket.sendMessage(sender, { text: `🚫 *Anti-Spam:* Currently *${cfg.ANTI_SPAM === 'on' ? 'ON ✅' : 'OFF ❌'}*\n\nDetects and removes repeated spam messages.\n\nUsage:\n.antispam on\n.antispam off` }, { quoted: msg });
-            }
-            cfg.ANTI_SPAM = sub;
-            await setUserConfigInMongo(sanitized, cfg);
-            await socket.sendMessage(sender, { react: { text: sub === 'on' ? '✅' : '❌', key: msg.key } });
-            await socket.sendMessage(sender, { text: `🚫 Anti-Spam turned *${sub.toUpperCase()}* ${sub === 'on' ? '✅' : '❌'}` }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Error: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
-        // ============================================================
-        // ANTICALL ON/OFF
-        // ============================================================
-        case 'anticall':
-        case 'creject': {
-          try {
-            const sanitized = (number || '').replace(/[^0-9]/g, '');
-            const cfg = await loadUserConfigFromMongo(sanitized) || {};
-            const sub = args[0]?.toLowerCase();
-            if (!sub || (sub !== 'on' && sub !== 'off')) {
-              return await socket.sendMessage(sender, { text: `📵 *Anti-Call:* Currently *${cfg.ANTI_CALL === 'on' ? 'ON ✅' : 'OFF ❌'}*\n\nAuto-rejects all incoming calls.\n\nUsage:\n.anticall on\n.anticall off` }, { quoted: msg });
-            }
-            cfg.ANTI_CALL = sub;
-            await setUserConfigInMongo(sanitized, cfg);
-            await socket.sendMessage(sender, { react: { text: sub === 'on' ? '✅' : '❌', key: msg.key } });
-            await socket.sendMessage(sender, { text: `📵 Anti-Call turned *${sub.toUpperCase()}* ${sub === 'on' ? '✅' : '❌'}` }, { quoted: msg });
-          } catch (e) { await socket.sendMessage(sender, { text: '❌ Error: ' + (e.message || e) }, { quoted: msg }); }
-          break;
-        }
-
         // default
         default:
           break;
@@ -6353,16 +6164,9 @@ async function deleteSessionAndCleanup(number, socketInstance) {
 
 // ---------------- auto-restart ----------------
 
-const reconnectCounters = new Map();
-const MAX_RECONNECT_ATTEMPTS = 5;
-
 function setupAutoRestart(socket, number) {
-  const sanitized = number.replace(/[^0-9]/g, '');
   socket.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect } = update;
-    if (connection === 'open') {
-      reconnectCounters.set(sanitized, 0);
-    }
     if (connection === 'close') {
       const statusCode = lastDisconnect?.error?.output?.statusCode
         || lastDisconnect?.error?.statusCode
@@ -6373,27 +6177,14 @@ function setupAutoRestart(socket, number) {
         || (lastDisconnect?.reason === DisconnectReason?.loggedOut);
       if (isLoggedOut) {
         console.log(`User ${number} logged out. Cleaning up...`);
-        reconnectCounters.delete(sanitized);
         try { await deleteSessionAndCleanup(number, socket); } catch (e) { console.error(e); }
       } else {
-        const attempts = (reconnectCounters.get(sanitized) || 0) + 1;
-        reconnectCounters.set(sanitized, attempts);
-        if (attempts > MAX_RECONNECT_ATTEMPTS) {
-          console.log(`Connection closed for ${number} — max reconnect attempts (${MAX_RECONNECT_ATTEMPTS}) reached. Stopping.`);
-          reconnectCounters.delete(sanitized);
-          activeSockets.delete(sanitized);
-          return;
-        }
-        console.log(`Connection closed for ${number} (not logout). Attempt reconnect ${attempts}/${MAX_RECONNECT_ATTEMPTS}...`);
-        try {
-          await delay(10000);
-          activeSockets.delete(sanitized);
-          socketCreationTime.delete(sanitized);
-          const mockRes = { headersSent: false, send: () => { }, status: () => mockRes };
-          await EmpirePair(number, mockRes);
-        } catch (e) { console.error('Reconnect attempt failed', e); }
+        console.log(`Connection closed for ${number} (not logout). Attempt reconnect...`);
+        try { await delay(10000); activeSockets.delete(number.replace(/[^0-9]/g, '')); socketCreationTime.delete(number.replace(/[^0-9]/g, '')); const mockRes = { headersSent: false, send: () => { }, status: () => mockRes }; await EmpirePair(number, mockRes); } catch (e) { console.error('Reconnect attempt failed', e); }
       }
+
     }
+
   });
 }
 
@@ -6421,85 +6212,48 @@ async function EmpirePair(number, res) {
   const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
   const logger = pino({ level: 'silent' });
 
-  // Fetch the latest WA version so WhatsApp doesn't reject the link
-  let waVersion;
-  try {
-    const { version } = await fetchLatestBaileysVersion();
-    waVersion = version;
-    console.log(`[EmpirePair] WA version fetched: ${JSON.stringify(version)}`);
-  } catch (_e) {
-    waVersion = [2, 3000, 1023223821]; // safe fallback
-    console.log(`[EmpirePair] WA version fallback: ${JSON.stringify(waVersion)}`);
-  }
-
-  const silentLogger = pino({ level: 'silent' });
-
   try {
     const socket = makeWASocket({
-      version: waVersion,
-      logger: silentLogger,
+      logger: pino({ level: "silent" }),
       printQRInTerminal: false,
-      browser: Browsers.ubuntu('Chrome'),
-      auth: {
-        creds: state.creds,
-        keys: makeCacheableSignalKeyStore(state.keys, silentLogger),
-      },
+      auth: state,
+      version: [2, 3000, 1033105955],
       connectTimeoutMs: 60000,
       defaultQueryTimeoutMs: 0,
-      keepAliveIntervalMs: 5000,
+      keepAliveIntervalMs: 10000,
       emitOwnEvents: true,
-      fireInitQueries: false,
-      generateHighQualityLinkPreview: false,
-      syncFullHistory: false,
-      markOnlineOnConnect: false
+      fireInitQueries: true,
+      generateHighQualityLinkPreview: true,
+      syncFullHistory: true,
+      markOnlineOnConnect: true,
+      browser: ['Mac OS', 'Safari', '10.15.7']
     });
 
     socketCreationTime.set(sanitizedNumber, Date.now());
 
-    // ── Watermark patch: auto-inject subtle kezu mark into every message ──
-    const _origSend = socket.sendMessage.bind(socket);
-    const _WM = '\n\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060\u2060ᴷᴱᶻᵁ';
-    socket.sendMessage = async (jid, content, options) => {
-      try {
-        if (content && typeof content === 'object') {
-          if (typeof content.text === 'string' && content.text.length > 0 && !content.delete && !content.react)
-            content.text += _WM;
-          if (typeof content.caption === 'string' && content.caption.length > 0)
-            content.caption += _WM;
-        }
-      } catch (_e) {}
-      return _origSend(jid, content, options);
-    };
-    // ─────────────────────────────────────────────────────────────────────
-
     setupStatusHandlers(socket, sanitizedNumber);
     setupCommandHandlers(socket, sanitizedNumber);
     setupMessageHandlers(socket, sanitizedNumber);
+    setupAutoRestart(socket, sanitizedNumber);
     setupNewsletterHandlers(socket, sanitizedNumber);
     handleMessageRevocation(socket, sanitizedNumber);
     setupAutoMessageRead(socket, sanitizedNumber);
     setupCallRejection(socket, sanitizedNumber);
-    setupAutoVoiceHandler(socket, sanitizedNumber);
-    setupAutoReplyHandler(socket, sanitizedNumber);
-    setupGroupEventsHandler(socket, sanitizedNumber);
-    setupAntiBugHandler(socket, sanitizedNumber);
-    setupAntiSpamHandler(socket, sanitizedNumber);
 
-    // For already-registered sessions (reconnect via setupAutoRestart mockRes),
-    // attach auto-restart immediately. For fresh pairing sockets, attach ONLY
-    // after connection opens — otherwise a ghost reconnect loop is created
-    // when the pairing code expires.
-    let _autoRestartAttached = false;
-    if (socket.authState.creds.registered) {
-      setupAutoRestart(socket, sanitizedNumber);
-      _autoRestartAttached = true;
-    }
+  
+        if (!socket.authState.creds.registered) {
+      let retries = config.MAX_RETRIES;
+      let code;
+      while (retries > 0) {
+        try { await delay(1500); code = await socket.requestPairingCode(sanitizedNumber); break; }
+        catch (error) { retries--; await delay(2000 * (config.MAX_RETRIES - retries)); }
+      }
+      if (!res.headersSent) res.send({ code });
+		}
 
-    // ── Register creds.update BEFORE requestPairingCode so we capture the
-    //    initial key generation that happens during the pairing handshake ──
+    // Save creds to Mongo when updated
     socket.ev.on('creds.update', async () => {
       try {
-        fs.ensureDirSync(sessionPath);
         await saveCreds();
 
         const credsPath = path.join(sessionPath, 'creds.json');
@@ -6526,21 +6280,9 @@ async function EmpirePair(number, res) {
       }
     });
 
-    // Track whether we have already sent the pair code to the user.
-    // Once sent, a transient WS close must NOT wipe the session — the user
-    // may still be in the process of entering the code in WhatsApp.
-    let _pairCodeSent = false;
-
-    // ── Register connection.update BEFORE requestPairingCode ──
     socket.ev.on('connection.update', async (update) => {
       const { connection } = update;
       if (connection === 'open') {
-        console.log(`[pair-open] ${sanitizedNumber} | registered=${socket.authState.creds.registered}`);
-        // Attach auto-restart NOW (first successful link of a fresh pairing socket)
-        if (!_autoRestartAttached) {
-          setupAutoRestart(socket, sanitizedNumber);
-          _autoRestartAttached = true;
-        }
         try {
           await delay(3000);
           const userJid = jidNormalizedUser(socket.user.id);
@@ -6585,7 +6327,7 @@ async function EmpirePair(number, res) {
           await delay(4000);
 
           const updatedCaption = formatMessage(useBotName,
-`𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 ᴄᴏɴɴᴇᴄᴛᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ 📍\n*• \`ᴠᴇʀꜱɪᴏɴ\` : ᴠ2.0.0*\n*• \`ʙᴏᴛ ᴄᴏɴɴᴇᴄᴛ ɴʙ\` : ${number}*\n*• \`ᴘᴏᴡᴇʀᴇᴅ ʙʏ\` : 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1*\n\n*•Hy Hy 𝐄𝐫𝐚𝐧𝐧𝐝𝐚-𝐌𝐃 2.0.0𝙑 වේත ඔයාව සාදරයෙන් පිලිගන්නවා.......🥹❤️‍🩹*\n\n_*ඉතිම් ලස්සන ලමයො 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 2.0.0𝙑  𝗠𝗜𝗡𝗜 𝗕𝗢𝗧 ගැන ඔයාලාට තියේන අදහස් අනිවාරෙන් කියන්න ඔනේ හරිද 🌚💗*_\n\n*🌐 ᴡᴇʙ ꜱɪᴛᴇ :*\n> https://ernnda-md-mini-bot.vercel.app/`,
+`𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 ᴄᴏɴɴᴇᴄᴛᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ 📍\n*• \`ᴠᴇʀꜱɪᴏɴ\` : ᴠ2.0.0*\n*• \`ʙᴏᴛ ᴄᴏɴɴᴇᴄᴛ ɴʙ\` : ${number}*\n*• \`ᴘᴏᴡᴇʀᴇᴅ ʙʏ\` : 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1*\n\n*•Hy Hy 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 2.0.0𝙑 වේත ඔයාව සාදරයෙන් පිලිගන්නවා.......🥹❤️‍🩹*\n\n_*ඉතිම් ලස්සන ලමයො 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1 2.0.0𝙑  𝗠𝗜𝗡𝗜 𝗕𝗢𝗧 ගැන ඔයාලාට තියේන අදහස් අනිවාරෙන් කියන්න ඔනේ හරිද 🌚💗*_\n\n*🌐 ᴡᴇʙ ꜱɪᴛᴇ :*\n>https://wa.me/+94705851067?text=𝐐𝐔𝐄𝐄𝐍𝐑𝐄𝐃𝐂𝐇𝐔𝐓𝐈/`,
                             '> *𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝐘 𝐐𝐔𝐄𝐄𝐍 𝐑𝐄𝐃 𝐂𝐇𝐔𝐓𝐈 𝐌𝐃 𝐕1📍📡*',
           );
 
@@ -6615,69 +6357,16 @@ async function EmpirePair(number, res) {
           await addNumberToMongo(sanitizedNumber);
 
         } catch (e) {
-          console.error('[Connection open error]', e.message || e);
-          // Reconnect will be handled by the close-event retry loop
+          console.error('Connection open error:', e);
+          try { exec(`pm2.restart ${process.env.PM2_NAME || 'CHATUWA-MINI-main'}`); } catch (e) { }
         }
       }
       if (connection === 'close') {
-        const closeCode = update.lastDisconnect?.error?.output?.statusCode
-          || update.lastDisconnect?.error?.output?.payload?.statusCode
-          || update.lastDisconnect?.error?.statusCode;
-        const closeReason = update.lastDisconnect?.error?.message
-          || update.lastDisconnect?.error?.toString()
-          || 'unknown';
-        console.log(`[pair-close] ${sanitizedNumber} | registered=${socket.authState.creds.registered} | codeSent=${_pairCodeSent} | code=${closeCode} | reason=${closeReason}`);
-
-        // 515 = restartRequired — this fires NORMALLY after a successful pairing.
-        // WhatsApp closes the unauthenticated socket and expects us to reconnect
-        // with the newly-saved credentials.
-        if (closeCode === 515 && socket.authState.creds.registered) {
-          console.log(`[pair-reconnect] ${sanitizedNumber} | pairing complete — reconnecting in 4 s…`);
-          activeSockets.delete(sanitizedNumber);
-          socketCreationTime.delete(sanitizedNumber);
-          setTimeout(async () => {
-            try {
-              const mockRes = { headersSent: true, send: () => {}, status: () => mockRes };
-              await EmpirePair(sanitizedNumber, mockRes);
-            } catch (e) {
-              console.error('[pair-reconnect] failed:', e.message || e);
-            }
-          }, 4000);
-        } else if (!socket.authState.creds.registered && !_pairCodeSent) {
-          // Socket closed before code was ever sent — clean up stale session
-          activeSockets.delete(sanitizedNumber);
-          socketCreationTime.delete(sanitizedNumber);
-          try { if (fs.existsSync(sessionPath)) fs.removeSync(sessionPath); } catch (e) { }
-        }
+        try { if (fs.existsSync(sessionPath)) fs.removeSync(sessionPath); } catch (e) { }
       }
     });
 
-    // ── requestPairingCode AFTER all handlers are registered ──
-    // Use Baileys' own waitForSocketOpen() so we request the code exactly when
-    // the noise handshake is done, not after a blind fixed delay.
-    if (!socket.authState.creds.registered) {
-      let retries = config.MAX_RETRIES;
-      let code;
-      while (retries > 0) {
-        try {
-          // Wait for socket to be fully open (noise handshake complete)
-          await Promise.race([
-            socket.waitForSocketOpen(),
-            new Promise((_, rej) => setTimeout(() => rej(new Error('Socket open timeout')), 15000)),
-          ]);
-          await delay(500); // brief settle after open
-          code = await socket.requestPairingCode(sanitizedNumber);
-          break;
-        } catch (error) {
-          console.error(`[requestPairingCode] attempt failed (${retries} left):`, error.message || error);
-          retries--;
-          await delay(2000); // wait before retrying
-        }
-      }
-      if (!code) console.error('[requestPairingCode] all retries exhausted for', sanitizedNumber);
-      if (code) _pairCodeSent = true; // prevent session wipe while user is entering code
-      if (!res.headersSent) res.send({ code });
-    }
+    activeSockets.set(sanitizedNumber, socket);
 
   } catch (error) {
     console.error('Pairing error:', error);
@@ -6753,27 +6442,7 @@ router.get('/admin/list', async (req, res) => {
 router.get('/', async (req, res) => {
   const { number } = req.query;
   if (!number) return res.status(400).send({ error: 'Number parameter is required' });
-  const sanitized = number.replace(/[^0-9]/g, '');
-  const existingSocket = activeSockets.get(sanitized);
-  if (existingSocket) {
-    const isReallyConnected = existingSocket.user &&
-      existingSocket.authState?.creds?.registered &&
-      existingSocket.ws?.readyState === 1; // WebSocket.OPEN
-    if (isReallyConnected) {
-      return res.status(200).send({ status: 'already_connected', message: 'This number is already connected' });
-    }
-    // Stale / dead socket — close it
-    try { existingSocket.ws?.close(); } catch (_e) {}
-    activeSockets.delete(sanitized);
-    socketCreationTime.delete(sanitized);
-  }
-  // Always wipe old creds before fresh pairing — stale MongoDB creds cause
-  // socket.authState.creds.registered=true which skips requestPairingCode entirely
-  try {
-    await removeSessionFromMongo(sanitized);
-    const sessionPath = path.join(os.tmpdir(), `session_${sanitized}`);
-    if (fs.existsSync(sessionPath)) fs.removeSync(sessionPath);
-  } catch (_e) {}
+  if (activeSockets.has(number.replace(/[^0-9]/g, ''))) return res.status(200).send({ status: 'already_connected', message: 'This number is already connected' });
   await EmpirePair(number, res);
 });
 
@@ -6943,303 +6612,6 @@ router.get('/api/admins', async (req, res) => {
 });
 
 
-// ---------------- Auto Voice Handler ----------------
-
-const AUTOVOICE_MAP = {
-  'gm': 'https://files.catbox.moe/b0lkle.ogg',
-  'good morning': 'https://files.catbox.moe/b0lkle.ogg',
-  'hi': 'https://files.catbox.moe/3f3kvj.ogg',
-  'hello': 'https://files.catbox.moe/3f3kvj.ogg',
-  'hii': 'https://files.catbox.moe/3f3kvj.ogg',
-  'hey': 'https://files.catbox.moe/3f3kvj.ogg',
-  'bye': 'https://files.catbox.moe/olz1ab.ogg',
-  'goodbye': 'https://files.catbox.moe/olz1ab.ogg',
-  'gn': 'https://files.catbox.moe/olz1ab.ogg',
-  'good night': 'https://files.catbox.moe/olz1ab.ogg',
-  'adareyi': 'https://files.catbox.moe/aq51yj.ogg',
-  'love you': 'https://files.catbox.moe/aq51yj.ogg',
-  'i love you': 'https://files.catbox.moe/aq51yj.ogg',
-  'thanks': 'https://files.catbox.moe/kiwzmj.ogg',
-  'thank you': 'https://files.catbox.moe/kiwzmj.ogg',
-  'thx': 'https://files.catbox.moe/kiwzmj.ogg',
-  'welcome': 'https://files.catbox.moe/kiwzmj.ogg',
-  'ok': 'https://files.catbox.moe/5wkq8l.ogg',
-  'okay': 'https://files.catbox.moe/5wkq8l.ogg',
-  'yes': 'https://files.catbox.moe/5wkq8l.ogg',
-  'yep': 'https://files.catbox.moe/5wkq8l.ogg',
-  'no': 'https://files.catbox.moe/5wkq8l.ogg',
-  'nope': 'https://files.catbox.moe/5wkq8l.ogg',
-  'bro': 'https://files.catbox.moe/3f3kvj.ogg',
-  'nangi': 'https://files.catbox.moe/aq51yj.ogg',
-  'akka': 'https://files.catbox.moe/aq51yj.ogg',
-  'aiya': 'https://files.catbox.moe/3f3kvj.ogg',
-  'lol': 'https://files.catbox.moe/5wkq8l.ogg',
-  'haha': 'https://files.catbox.moe/5wkq8l.ogg',
-  'hehe': 'https://files.catbox.moe/5wkq8l.ogg',
-};
-
-// In-memory cache so each OGG is downloaded once per process run
-const _voiceCache = new Map();
-
-async function _fetchVoiceBuffer(url) {
-  if (_voiceCache.has(url)) return _voiceCache.get(url);
-  const resp = await axios.get(url, { responseType: 'arraybuffer', timeout: 12000 });
-  const buf = Buffer.from(resp.data);
-  _voiceCache.set(url, buf);
-  return buf;
-}
-
-function setupAutoVoiceHandler(socket, sessionNumber) {
-  socket.ev.on('messages.upsert', async ({ messages, type }) => {
-    // Only process brand-new incoming messages, not history sync or edits
-    if (type !== 'notify') return;
-    try {
-      const msg = messages[0];
-      if (!msg || !msg.message || msg.key.fromMe) return;
-      if (msg.key.remoteJid === 'status@broadcast') return;
-
-      const sanitized = (sessionNumber || '').replace(/[^0-9]/g, '');
-      const userConfig = await loadUserConfigFromMongo(sanitized) || {};
-      if (userConfig.AUTO_VOICE !== 'on') return;
-
-      // Unwrap ephemeral / viewOnce wrappers before reading content type
-      let innerMsg = msg.message;
-      if (innerMsg.ephemeralMessage) innerMsg = innerMsg.ephemeralMessage.message;
-      if (innerMsg.viewOnceMessage) innerMsg = innerMsg.viewOnceMessage.message;
-
-      const type2 = getContentType(innerMsg);
-      let body = '';
-      if (type2 === 'conversation') {
-        body = innerMsg.conversation || '';
-      } else if (type2 === 'extendedTextMessage') {
-        body = innerMsg.extendedTextMessage?.text || '';
-      } else if (type2 === 'imageMessage') {
-        body = innerMsg.imageMessage?.caption || '';
-      } else if (type2 === 'videoMessage') {
-        body = innerMsg.videoMessage?.caption || '';
-      }
-      if (!body) return;
-
-      const lBody = body.trim().toLowerCase();
-      // Don't trigger on bot commands
-      if (lBody.startsWith(config.PREFIX)) return;
-      // Must be an exact keyword match
-      const voiceUrl = AUTOVOICE_MAP[lBody];
-      if (!voiceUrl) return;
-
-      // Download buffer locally — avoids WhatsApp refreshMediaConn upload failures
-      const audioBuffer = await _fetchVoiceBuffer(voiceUrl);
-
-      // Build a fake waveform so WhatsApp renders the PTT bar properly
-      const waveform = Buffer.from(
-        Array.from({ length: 64 }, () => Math.floor(Math.random() * 100))
-      );
-
-      await socket.sendMessage(msg.key.remoteJid, {
-        audio: audioBuffer,
-        mimetype: 'audio/ogg; codecs=opus',
-        ptt: true,
-        waveform
-      }, { quoted: msg });
-
-    } catch (e) {
-      console.error('[AutoVoice error]', e.message || e);
-    }
-  });
-}
-
-// ---------------- Auto Reply Handler ----------------
-
-function setupAutoReplyHandler(socket, sessionNumber) {
-  socket.ev.on('messages.upsert', async ({ messages }) => {
-    try {
-      const msg = messages[0];
-      if (!msg || !msg.message || msg.key.fromMe) return;
-      if (msg.key.remoteJid === 'status@broadcast') return;
-      // Only in private chats
-      if (msg.key.remoteJid.endsWith('@g.us')) return;
-      const sanitized = (sessionNumber || '').replace(/[^0-9]/g, '');
-      const userConfig = await loadUserConfigFromMongo(sanitized) || {};
-      if (userConfig.AUTO_REPLY !== 'on' || !userConfig.AUTO_REPLY_MSG) return;
-
-      const type = getContentType(msg.message);
-      let body = '';
-      if (type === 'conversation') body = msg.message.conversation || '';
-      else if (type === 'extendedTextMessage') body = msg.message.extendedTextMessage?.text || '';
-      if (!body || body.startsWith(config.PREFIX)) return;
-
-      await socket.sendMessage(msg.key.remoteJid, {
-        text: userConfig.AUTO_REPLY_MSG
-      }, { quoted: msg });
-    } catch (e) {
-      // silent fail
-    }
-  });
-}
-
-// ---------------- Group Events Handler (welcome/goodbye/antilink) ----------------
-
-function setupGroupEventsHandler(socket, sessionNumber) {
-  // Group participant updates (join/leave)
-  socket.ev.on('group-participants.update', async (update) => {
-    try {
-      const { id, participants, action } = update;
-      if (!id || !participants || !participants.length) return;
-      const sanitized = (sessionNumber || '').replace(/[^0-9]/g, '');
-      const userConfig = await loadUserConfigFromMongo(sanitized) || {};
-
-      let gm = null;
-      try { gm = await socket.groupMetadata(id); } catch (e) { }
-      const groupName = gm?.subject || 'Group';
-
-      let groupPP = config.RCD_IMAGE_PATH;
-      try { groupPP = await socket.profilePictureUrl(id, 'image'); } catch (e) { }
-
-      for (const participant of participants) {
-        const userNum = participant.split('@')[0];
-        let userPP = config.RCD_IMAGE_PATH;
-        try { userPP = await socket.profilePictureUrl(participant, 'image'); } catch (e) { }
-
-        if (action === 'add' && userConfig.WELCOME === 'on') {
-          const welcomeText = `*╭━━━━━━━━━━━━━━━╮*\n*│ 👋 WELCOME!*\n*│*\n*│ 🌟 @${userNum}*\n*│ joined ${groupName}*\n*│*\n*│ 👥 Members: ${gm?.participants?.length || '?'}*\n*╰━━━━━━━━━━━━━━━╯*\n\n> *Welcome to the group! 🎉*`;
-          await socket.sendMessage(id, {
-            image: { url: userPP },
-            caption: welcomeText,
-            mentions: [participant]
-          });
-        } else if (action === 'remove' && userConfig.GOODBYE === 'on') {
-          const goodbyeText = `*╭━━━━━━━━━━━━━━━╮*\n*│ 👋 GOODBYE!*\n*│*\n*│ 😢 @${userNum}*\n*│ left ${groupName}*\n*╰━━━━━━━━━━━━━━━╯*\n\n> *See you again someday! 👋*`;
-          await socket.sendMessage(id, {
-            image: { url: userPP },
-            caption: goodbyeText,
-            mentions: [participant]
-          });
-        }
-      }
-    } catch (e) {
-      console.error('Group events handler error:', e);
-    }
-  });
-
-  // Anti-link (message filter for groups)
-  socket.ev.on('messages.upsert', async ({ messages }) => {
-    try {
-      const msg = messages[0];
-      if (!msg || !msg.message || msg.key.fromMe) return;
-      if (!msg.key.remoteJid?.endsWith('@g.us')) return;
-      const sanitized = (sessionNumber || '').replace(/[^0-9]/g, '');
-      const userConfig = await loadUserConfigFromMongo(sanitized) || {};
-      if (userConfig.ANTI_LINK !== 'on') return;
-
-      const type = getContentType(msg.message);
-      let body = '';
-      if (type === 'conversation') body = msg.message.conversation || '';
-      else if (type === 'extendedTextMessage') body = msg.message.extendedTextMessage?.text || '';
-      if (!body) return;
-
-      const linkRegex = /(https?:\/\/[^\s]+|chat\.whatsapp\.com\/[^\s]+|wa\.me\/[^\s]+)/gi;
-      if (!linkRegex.test(body)) return;
-
-      // Check if sender is admin — if so, allow
-      let gm = null;
-      try { gm = await socket.groupMetadata(msg.key.remoteJid); } catch (e) { }
-      const sender = msg.key.participant || msg.key.remoteJid;
-      const isAdmin = (gm?.participants || []).find(p => (p.id || p.jid) === sender && (p.admin === 'admin' || p.admin === 'superadmin'));
-      if (isAdmin) return;
-
-      // Delete the message and warn
-      try { await socket.sendMessage(msg.key.remoteJid, { delete: msg.key }); } catch (e) { }
-      await socket.sendMessage(msg.key.remoteJid, {
-        text: `🛡️ *Anti-Link:* @${sender.split('@')[0]} — Links are not allowed in this group!`,
-        mentions: [sender]
-      });
-    } catch (e) {
-      // silent fail
-    }
-  });
-}
-
-// ---------------- Anti-Bug Handler ----------------
-
-function setupAntiBugHandler(socket, sessionNumber) {
-  socket.ev.on('messages.upsert', async ({ messages }) => {
-    try {
-      const msg = messages[0];
-      if (!msg || !msg.message || msg.key.fromMe) return;
-      if (msg.key.remoteJid === 'status@broadcast') return;
-      const sanitized = (sessionNumber || '').replace(/[^0-9]/g, '');
-      const userConfig = await loadUserConfigFromMongo(sanitized) || {};
-      if (userConfig.ANTI_BUG !== 'on') return;
-
-      // Detect potentially malicious/crash-causing message types
-      const rawMsg = msg.message;
-      const hasSuspiciousContent = (
-        rawMsg.protocolMessage ||
-        rawMsg.senderKeyDistributionMessage ||
-        (rawMsg.extendedTextMessage?.text?.length > 5000) ||
-        (rawMsg.conversation?.length > 5000)
-      );
-      if (!hasSuspiciousContent) return;
-
-      // Delete the suspect message
-      try { await socket.sendMessage(msg.key.remoteJid, { delete: msg.key }); } catch (e) { }
-      console.log(`🐛 Anti-Bug: Blocked suspicious message from ${msg.key.participant || msg.key.remoteJid}`);
-    } catch (e) {
-      // silent fail
-    }
-  });
-}
-
-// ---------------- Anti-Spam Handler ----------------
-
-const spamTracker = new Map(); // { jid_from: { count, lastTime, msgs[] } }
-
-function setupAntiSpamHandler(socket, sessionNumber) {
-  socket.ev.on('messages.upsert', async ({ messages }) => {
-    try {
-      const msg = messages[0];
-      if (!msg || !msg.message || msg.key.fromMe) return;
-      if (!msg.key.remoteJid?.endsWith('@g.us')) return;
-      const sanitized = (sessionNumber || '').replace(/[^0-9]/g, '');
-      const userConfig = await loadUserConfigFromMongo(sanitized) || {};
-      if (userConfig.ANTI_SPAM !== 'on') return;
-
-      const sender = msg.key.participant || msg.key.remoteJid;
-      const trackKey = `${msg.key.remoteJid}_${sender}`;
-      const now = Date.now();
-      const WINDOW = 5000; // 5 seconds
-      const LIMIT = 5;     // 5 messages in 5 seconds = spam
-
-      if (!spamTracker.has(trackKey)) spamTracker.set(trackKey, { count: 0, lastTime: now });
-      const track = spamTracker.get(trackKey);
-
-      if (now - track.lastTime > WINDOW) {
-        track.count = 1;
-        track.lastTime = now;
-      } else {
-        track.count++;
-      }
-
-      if (track.count >= LIMIT) {
-        track.count = 0; // reset
-        // Check if sender is admin
-        let gm = null;
-        try { gm = await socket.groupMetadata(msg.key.remoteJid); } catch (e) { }
-        const isAdmin = (gm?.participants || []).find(p => (p.id || p.jid) === sender && (p.admin === 'admin' || p.admin === 'superadmin'));
-        if (isAdmin) return;
-
-        await socket.sendMessage(msg.key.remoteJid, {
-          text: `🚫 *Anti-Spam:* @${sender.split('@')[0]} — Please stop spamming!`,
-          mentions: [sender]
-        });
-        console.log(`🚫 Anti-Spam: Warning sent to ${sender}`);
-      }
-    } catch (e) {
-      // silent fail
-    }
-  });
-}
-
 // ---------------- cleanup + process events ----------------
 
 process.on('exit', () => {
@@ -7253,11 +6625,8 @@ process.on('exit', () => {
 
 
 process.on('uncaughtException', (err) => {
-  console.error('[uncaughtException]', err);
-  // On Railway/Heroku the platform auto-restarts on exit — no pm2 needed
-  if (process.env.NODE_ENV !== 'development') {
-    setTimeout(() => process.exit(1), 1000);
-  }
+  console.error('Uncaught exception:', err);
+  try { exec(`pm2.restart ${process.env.PM2_NAME || 'CHATUWA-MINI-main'}`); } catch (e) { console.error('Failed to restart pm2:', e); }
 });
 
 

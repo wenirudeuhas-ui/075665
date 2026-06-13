@@ -1,7 +1,7 @@
 {
-  "name": "𝚁𝙴𝙳 Queen 𝙼𝙳 𝙼𝙸𝙽𝙸 𝙱𝙾𝚃",
+  "name": "𝚁𝙴𝙳 𝚆𝙰𝚃𝙴𝚁 𝙼𝙳 𝙼𝙸𝙽𝙸 𝙱𝙾𝚃",
   "version": "2.0.0",
-  "description": "kezu bot bot v1",
+  "description": "dew-md-mini WhatsApp Bot with Multi-Number Support",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"

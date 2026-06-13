@@ -1,563 +1,306 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="si">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>ERANDA MD — WhatsApp Bot</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ERANNDA-MD pair</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
   <style>
-    :root {
-      --bg: #e8edf3;
-      --card: #e8edf3;
-      --shadow-light: rgba(255,255,255,0.92);
-      --shadow-dark: rgba(163,177,198,0.72);
-      --accent: #a78bfa;
-      --accent2: #7c3aed;
-      --text: #374151;
-      --subtext: #6b7280;
-      --inset-light: rgba(255,255,255,0.85);
-      --inset-dark: rgba(163,177,198,0.55);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    * { box-sizing:border-box; margin:0; padding:0 }
     body {
-      font-family: 'Poppins', sans-serif;
-      background: var(--bg);
-      min-height: 100vh;
-      color: var(--text);
-      overflow-x: hidden;
+      font-family:'Poppins',sans-serif;
+      background: radial-gradient(circle at center, #000000 0%, #111111 100%);
+      color:#ffffff;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      padding:20px;
+      animation:fadeIn 2s ease;
     }
 
-    /* ─── HERO ──────────────────────────── */
-    .hero {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 60px 24px 40px;
-      text-align: center;
-      position: relative;
+    @keyframes fadeIn {
+      0% { opacity:0; transform:scale(0.98); }
+      100% { opacity:1; transform:scale(1); }
     }
 
-    /* Lotus SVG */
-    .lotus-wrap {
-      width: 200px;
-      height: 200px;
-      margin-bottom: 28px;
-      border-radius: 50%;
-      background: var(--bg);
-      box-shadow:
-        -10px -10px 24px var(--shadow-light),
-         10px  10px 24px var(--shadow-dark);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: floatLotus 5s ease-in-out infinite;
+    
+    .particles span {
+      position:absolute;
+      display:block;
+      width: 9px;
+      height: 9px;
+      background:radial-gradient(circle,#EA00FF,#444);
+      border-radius:50%;
+      opacity:0.5;
+      animation:float 6s linear infinite;
     }
 
-    @keyframes floatLotus {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-12px); }
+    @keyframes float {
+      0% { transform:translateY(100vh) scale(0.6); opacity:0; }
+      30% { opacity:1; }
+      100% { transform:translateY(-10vh) scale(1.2); opacity:0; }
     }
 
-    .lotus-wrap svg { width: 140px; height: 140px; }
+    .wrap { position:relative; z-index:2; width:380px; max-width:95%; }
 
-    /* Welcome text */
-    .welcome-tag {
-      display: inline-block;
-      background: var(--bg);
-      box-shadow:
-        -4px -4px 10px var(--shadow-light),
-         4px  4px 10px var(--shadow-dark);
-      border-radius: 100px;
-      padding: 6px 20px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--accent2);
-      margin-bottom: 18px;
+    .box {
+      background: linear-gradient(180deg, rgba(153, 50, 205, 0.1), rgba(118, 34, 139, 0.4));
+      border: 1px solid rgba(170, 0, 200, 0.5);     
+      border-radius:20px;
+      padding:90px 22px 40px;
+      text-align:center;
+      box-shadow:0 0 35px rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      transition:all .5s ease;
+      animation:boxPop 1.3s ease;
     }
 
-    .hero h1 {
-      font-size: clamp(32px, 7vw, 56px);
-      font-weight: 800;
-      color: var(--text);
-      line-height: 1.1;
-      letter-spacing: -1px;
+    @keyframes boxPop {
+      0% { transform:translateY(60px); opacity:0; }
+      100% { transform:translateY(0); opacity:1; }
     }
 
-    .hero h1 span {
-      background: linear-gradient(135deg, #7c3aed, #a78bfa, #6d28d9);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+     .span {
+        display: inline-block;        
+        width: 15px;                  
+        height: 15px;                
+        background-color: #D6FF00;  
+        box-shadow: 0 0 10px #D6FF00;     
+        border-radius: 50%;
+        position: absolute;
+        bottom: 89%;
+        left: 60%;
+  }
+  
+  
+    .avatar {
+      position:absolute;
+      top:-60px;
+      left:50%;
+      transform:translateX(-50%);
+      object-fit: cover;
+      width:120px;
+      height:120px;
+      border-radius:50%;
+      overflow:hidden;
+      border:4px solid #B100C9;
+      box-shadow: 0 0 25px rgba(181, 0, 200, 0.5);
+      animation:glow 3s infinite alternate;
     }
 
-    .hero-sub {
-      margin-top: 12px;
-      font-size: 15px;
-      color: var(--subtext);
-      font-weight: 400;
-      max-width: 400px;
-      line-height: 1.6;
+    @keyframes glow {
+      from { box-shadow:0 0 20px rgba(151, 0, 200, 0.5); }
+      to { box-shadow:0 0 40px rgba(170, 0, 200, 0.5); }
     }
 
-    /* CTA buttons */
-    .hero-btns {
-      display: flex;
-      gap: 14px;
-      margin-top: 32px;
-      flex-wrap: wrap;
-      justify-content: center;
+    .avatar img { width:100%; height:100%; object-fit:cover; }
+
+    h3 { color:#CB00FF; margin-top:6px; letter-spacing:1px; }
+    h6 { color:#abc; font-weight:500; margin:6px 0 }
+
+    .input-container { margin-top:16px; text-align:left; }
+    .input-container input {
+      width:100%;
+      padding:12px 14px;
+      border-radius:10px;
+      border:none;
+      background: #111;
+      outline: none;
+      color:#fff;
+      font-size:15px;
+      font-weight:700;
+      border:1px solid rgba(255,255,255,0.15);
+      transition:0.25s;
+    }
+    .input-container input:focus {
+      box-shadow: inset 0 0 14px #CB00FF;
+      border-color:#B100FF;
     }
 
-    .btn-primary {
-      padding: 14px 34px;
-      border: none;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #7c3aed, #a78bfa);
-      color: #fff;
-      font-family: 'Poppins', sans-serif;
-      font-size: 14px;
+    .submit-btn {
+      margin-top:14px;
+      width:100%;
+      padding:12px 0;
+      background:#A000C9;
+      color:#000;
+      border:none;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+      transition: .4s;
+    }
+    .submit-btn:hover {
+      transform:scale(1.04);
+      color: #F700FF;
+      background: #444;
+    }
+
+    .info {
+      margin-top:14px;
+      color:#bbb;
+      font-weight:600;
+    }
+
+    .actions {
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      margin-top:20px;
+    }
+
+    .join-btn {
+      background:#A400C9;
+      color:#000;
+      padding:10px 18px;
+      border-radius:12px;
+      font-weight:700;
+      cursor:pointer;
+      border:none;
+      transition:0.25s;
+    }
+
+    .join-btn:hover { background:#f1f1f1; }
+
+    .ghost-btn {
+      background:transparent;
+      border:1px solid #fff3;
+      padding:10px 12px;
+      border-radius:10px;
+      color: red;
       font-weight: 700;
-      cursor: pointer;
-      letter-spacing: 0.5px;
-      box-shadow:
-        -4px -4px 10px var(--shadow-light),
-         4px  4px 10px var(--shadow-dark),
-         0 8px 20px rgba(124,58,237,0.35);
-      transition: all 0.3s ease;
+      cursor:pointer;
     }
 
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow:
-        -4px -4px 10px var(--shadow-light),
-         4px  4px 10px var(--shadow-dark),
-         0 14px 28px rgba(124,58,237,0.45);
-    }
+    .ghost-btn:hover { color:#fff; border-color:#fff6; }
 
-    .btn-secondary {
-      padding: 14px 28px;
-      border: none;
-      border-radius: 14px;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Poppins', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow:
-        -4px -4px 10px var(--shadow-light),
-         4px  4px 10px var(--shadow-dark);
-      transition: all 0.3s ease;
-    }
+    .box.hide { transform:translateY(120px) scale(.95); opacity:0; }
 
-    .btn-secondary:hover {
-      box-shadow:
-        -2px -2px 6px var(--shadow-light),
-         2px  2px 6px var(--shadow-dark);
+    @media (max-width:420px){
+      .avatar{width:96px;height:96px;top:-48px}
+      .box{padding-top:78px}
+    
     }
-
-    /* ─── STATS ROW ─────────────────────── */
-    .stats {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      padding: 0 24px 48px;
-      flex-wrap: wrap;
-    }
-
-    .stat-card {
-      background: var(--bg);
-      border-radius: 20px;
-      padding: 24px 28px;
-      text-align: center;
-      min-width: 130px;
-      box-shadow:
-        -8px -8px 18px var(--shadow-light),
-         8px  8px 18px var(--shadow-dark);
-      transition: all 0.3s ease;
-    }
-
-    .stat-card:hover {
-      box-shadow:
-        -4px -4px 10px var(--shadow-light),
-         4px  4px 10px var(--shadow-dark);
-      transform: translateY(-2px);
-    }
-
-    .stat-num {
-      font-size: 28px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #7c3aed, #a78bfa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .stat-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--subtext);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-top: 4px;
-    }
-
-    /* ─── FEATURES ──────────────────────── */
-    .section-title {
-      text-align: center;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--accent2);
-      margin-bottom: 32px;
-      padding: 0 24px;
-    }
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      padding: 0 24px 48px;
-      max-width: 960px;
-      margin: 0 auto;
-    }
-
-    .feat-card {
-      background: var(--bg);
-      border-radius: 22px;
-      padding: 28px 24px;
-      box-shadow:
-        -8px -8px 20px var(--shadow-light),
-         8px  8px 20px var(--shadow-dark);
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: flex-start;
-      gap: 18px;
-    }
-
-    .feat-card:hover {
-      transform: translateY(-4px);
-      box-shadow:
-        -10px -10px 24px var(--shadow-light),
-         10px  10px 24px var(--shadow-dark);
-    }
-
-    .feat-icon {
-      width: 52px;
-      height: 52px;
-      min-width: 52px;
-      border-radius: 16px;
-      background: var(--bg);
-      box-shadow:
-        inset -4px -4px 8px var(--inset-light),
-        inset  4px  4px 8px var(--inset-dark);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-    }
-
-    .feat-body h4 {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .feat-body p {
-      font-size: 13px;
-      color: var(--subtext);
-      line-height: 1.55;
-    }
-
-    /* ─── COMMAND PILLS ─────────────────── */
-    .cmds-section {
-      padding: 0 24px 48px;
-      max-width: 960px;
-      margin: 0 auto;
-    }
-
-    .pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .pill {
-      background: var(--bg);
-      border-radius: 100px;
-      padding: 8px 18px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--accent2);
-      box-shadow:
-        -4px -4px 8px var(--shadow-light),
-         4px  4px 8px var(--shadow-dark);
-      transition: all 0.25s ease;
-      cursor: default;
-      letter-spacing: 0.3px;
-    }
-
-    .pill:hover {
-      box-shadow:
-        inset -3px -3px 6px var(--inset-light),
-        inset  3px  3px 6px var(--inset-dark);
-      transform: scale(0.97);
-    }
-
-    /* ─── FOOTER ────────────────────────── */
-    .footer {
-      text-align: center;
-      padding: 32px 24px 48px;
-      color: var(--subtext);
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    .footer strong {
-      color: var(--accent2);
-    }
-
-    /* ─── ONLINE DOT ────────────────────── */
-    .online-dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      background: #34d399;
-      border-radius: 50%;
-      margin-right: 6px;
-      box-shadow: 0 0 0 3px rgba(52,211,153,0.25);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 3px rgba(52,211,153,0.25); }
-      50%       { box-shadow: 0 0 0 7px rgba(52,211,153,0.08); }
-    }
-
-    /* ─── DIVIDER ───────────────────────── */
-    .divider {
-      width: 60px;
-      height: 4px;
-      background: linear-gradient(90deg, #7c3aed, #a78bfa);
-      border-radius: 100px;
-      margin: 0 auto 40px;
-    }
-
-    /* ─── RESPONSIVE ────────────────────── */
-    @media (max-width: 520px) {
-      .lotus-wrap { width: 160px; height: 160px; }
-      .lotus-wrap svg { width: 110px; height: 110px; }
-      .hero { padding: 40px 16px 28px; }
-      .stats { gap: 12px; }
-      .stat-card { padding: 18px 20px; min-width: 110px; }
-    }
+    
   </style>
 </head>
+
 <body>
+  <div class="particles" id="particles"></div>
 
-  <!-- HERO -->
-  <section class="hero">
+  <div class="wrap">
+    <div class="box" id="mainBox">         
+      <div class="avatar">
+        <img src="https://files.catbox.moe/5ncuwv.jpeg" alt="Avatar">          
+      </div>  
+     <span class="span"></span> 
+      <h3>ERNNDA-MD PAIR</h3>
+      <h6>Canet Bot</h6>
+      <h6>ᴇɴᴛᴇʀ ʏᴏᴜʀ ᴡʜᴀᴛꜱᴀᴘᴘ ɴᴜᴍʙᴇʀ ᴡɪᴛʜ ᴄᴏᴜɴᴛʀʏ ᴄᴏᴅᴇ</h6>
 
-    <!-- Lotus -->
-    <div class="lotus-wrap">
-      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#7c3aed"/>
-            <stop offset="100%" style="stop-color:#c4b5fd"/>
-          </linearGradient>
-          <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#a78bfa"/>
-            <stop offset="100%" style="stop-color:#ede9fe"/>
-          </linearGradient>
-        </defs>
-
-        <!-- Outer petals (large, background) -->
-        <ellipse cx="100" cy="80" rx="16" ry="52" fill="url(#g2)" opacity="0.55" transform="rotate(-40 100 120)"/>
-        <ellipse cx="100" cy="80" rx="16" ry="52" fill="url(#g2)" opacity="0.55" transform="rotate(-80 100 120)"/>
-        <ellipse cx="100" cy="80" rx="16" ry="52" fill="url(#g2)" opacity="0.55" transform="rotate(0 100 120)"/>
-        <ellipse cx="100" cy="80" rx="16" ry="52" fill="url(#g2)" opacity="0.55" transform="rotate(40 100 120)"/>
-        <ellipse cx="100" cy="80" rx="16" ry="52" fill="url(#g2)" opacity="0.55" transform="rotate(80 100 120)"/>
-
-        <!-- Mid petals -->
-        <ellipse cx="100" cy="88" rx="13" ry="42" fill="url(#g1)" opacity="0.75" transform="rotate(-30 100 120)"/>
-        <ellipse cx="100" cy="88" rx="13" ry="42" fill="url(#g1)" opacity="0.75" transform="rotate(-60 100 120)"/>
-        <ellipse cx="100" cy="88" rx="13" ry="42" fill="url(#g1)" opacity="0.75" transform="rotate(0 100 120)"/>
-        <ellipse cx="100" cy="88" rx="13" ry="42" fill="url(#g1)" opacity="0.75" transform="rotate(30 100 120)"/>
-        <ellipse cx="100" cy="88" rx="13" ry="42" fill="url(#g1)" opacity="0.75" transform="rotate(60 100 120)"/>
-        <ellipse cx="100" cy="88" rx="13" ry="42" fill="url(#g1)" opacity="0.75" transform="rotate(-90 100 120)"/>
-        <ellipse cx="100" cy="88" rx="13" ry="42" fill="url(#g1)" opacity="0.75" transform="rotate(90 100 120)"/>
-
-        <!-- Inner petals -->
-        <ellipse cx="100" cy="95" rx="10" ry="32" fill="#7c3aed" opacity="0.9" transform="rotate(-45 100 120)"/>
-        <ellipse cx="100" cy="95" rx="10" ry="32" fill="#7c3aed" opacity="0.9" transform="rotate(0 100 120)"/>
-        <ellipse cx="100" cy="95" rx="10" ry="32" fill="#7c3aed" opacity="0.9" transform="rotate(45 100 120)"/>
-        <ellipse cx="100" cy="95" rx="10" ry="32" fill="#7c3aed" opacity="0.9" transform="rotate(90 100 120)"/>
-        <ellipse cx="100" cy="95" rx="10" ry="32" fill="#7c3aed" opacity="0.9" transform="rotate(-90 100 120)"/>
-        <ellipse cx="100" cy="95" rx="10" ry="32" fill="#7c3aed" opacity="0.9" transform="rotate(135 100 120)"/>
-        <ellipse cx="100" cy="95" rx="10" ry="32" fill="#7c3aed" opacity="0.9" transform="rotate(-135 100 120)"/>
-        <ellipse cx="100" cy="95" rx="10" ry="32" fill="#7c3aed" opacity="0.9" transform="rotate(180 100 120)"/>
-
-        <!-- Center -->
-        <circle cx="100" cy="120" r="18" fill="url(#g1)"/>
-        <circle cx="100" cy="120" r="11" fill="#ede9fe"/>
-        <circle cx="100" cy="120" r="5" fill="url(#g1)"/>
-      </svg>
-    </div>
-
-    <div class="welcome-tag">✦ Welcome Back ✦</div>
-
-    <h1>ERANDA<br/><span>MD BOT</span></h1>
-    <p class="hero-sub">
-      <span class="online-dot"></span>Premium WhatsApp Automation Bot —
-      Download, AI Tools, Group Management & more, all at your fingertips.
-    </p>
-
-    <div class="hero-btns">
-      <button class="btn-primary" onclick="location.href='/pair'">🔗 Connect Bot</button>
-      <button class="btn-secondary" onclick="window.open('https://whatsapp.com/channel/0029Vb7y6JB1yT20bJxMcP45','_blank')">📢 Channel</button>
-    </div>
-  </section>
-
-  <!-- STATS -->
-  <div class="stats">
-    <div class="stat-card">
-      <div class="stat-num" id="sessCount">—</div>
-      <div class="stat-label">Active Sessions</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">100+</div>
-      <div class="stat-label">Commands</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">24/7</div>
-      <div class="stat-label">Online</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">V1</div>
-      <div class="stat-label">Version</div>
-    </div>
-  </div>
-
-  <!-- FEATURES -->
-  <p class="section-title">✦ Features</p>
-  <div class="divider"></div>
-
-  <div class="features">
-    <div class="feat-card">
-      <div class="feat-icon">📥</div>
-      <div class="feat-body">
-        <h4>Download Suite</h4>
-        <p>YouTube, TikTok, Instagram, Facebook, Spotify & MediaFire downloads at blazing speed.</p>
+      <div class="input-container">
+        <input id="number" type="tel" placeholder="94xxxxxxx" inputmode="numeric" pattern="[0-9]*" />
       </div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">🤖</div>
-      <div class="feat-body">
-        <h4>AI Tools</h4>
-        <p>Image generation, stickers, background remover, AI chat & creative tools built-in.</p>
-      </div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">👥</div>
-      <div class="feat-body">
-        <h4>Group Management</h4>
-        <p>Kick, add, promote, demote, anti-link, welcome & goodbye — full admin toolkit.</p>
-      </div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">🛡️</div>
-      <div class="feat-body">
-        <h4>Smart Protection</h4>
-        <p>Anti-spam, anti-bug, anti-call, anti-link and auto-moderation to keep groups safe.</p>
-      </div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">🎙️</div>
-      <div class="feat-body">
-        <h4>Auto Voice</h4>
-        <p>Responds with voice notes for greetings — hi, gm, bye, adareyi & more keywords.</p>
-      </div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">⚡</div>
-      <div class="feat-body">
-        <h4>Multi-Session</h4>
-        <p>Connect multiple WhatsApp numbers simultaneously — each with its own settings.</p>
+      <button id="submit" class="submit-btn">SUBMIT</button>
+      
+     <div class="info" id="pair" style="min-height:28px"></div>
+ 
+      <div class="actions">
+        <button class="join-btn" id="joinBtn">JOIN CHANNEL</button>
+        <button class="ghost-btn" id="clearBtn">CLEAR</button>
       </div>
     </div>
   </div>
-
-  <!-- COMMANDS -->
-  <p class="section-title">✦ Commands</p>
-  <div class="divider"></div>
-
-  <div class="cmds-section">
-    <div class="pills">
-      <span class="pill">.menu</span>
-      <span class="pill">.download</span>
-      <span class="pill">.ytmp3</span>
-      <span class="pill">.ytmp4</span>
-      <span class="pill">.tiktok</span>
-      <span class="pill">.insta</span>
-      <span class="pill">.fb</span>
-      <span class="pill">.spotify</span>
-      <span class="pill">.alive</span>
-      <span class="pill">.ping</span>
-      <span class="pill">.sticker</span>
-      <span class="pill">.toimg</span>
-      <span class="pill">.kick</span>
-      <span class="pill">.add</span>
-      <span class="pill">.promote</span>
-      <span class="pill">.demote</span>
-      <span class="pill">.mute</span>
-      <span class="pill">.unmute</span>
-      <span class="pill">.tagall</span>
-      <span class="pill">.hidetag</span>
-      <span class="pill">.antilink</span>
-      <span class="pill">.welcome</span>
-      <span class="pill">.goodbye</span>
-      <span class="pill">.grouplink</span>
-      <span class="pill">.revoke</span>
-      <span class="pill">.groupname</span>
-      <span class="pill">.autovoice</span>
-      <span class="pill">.autoreply</span>
-      <span class="pill">.antibug</span>
-      <span class="pill">.antispam</span>
-      <span class="pill">.anticall</span>
-      <span class="pill">.setting</span>
-      <span class="pill">.owner</span>
-      <span class="pill">.system</span>
-      <span class="pill">.jid</span>
-      <span class="pill">.pp</span>
-      <span class="pill">.block</span>
-      <span class="pill">.unblock</span>
-      <span class="pill">.mediafire</span>
-      <span class="pill">.apkdownload</span>
-    </div>
-  </div>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    <strong>ERANDA MD V1</strong> — Built with 💜 by <strong>Kezu</strong><br/>
-    <span style="opacity:0.6;font-size:11px;">Powered by @whiskeysockets/baileys · MongoDB · Node.js</span>
-  </footer>
 
   <script>
-    fetch('/code/active')
-      .then(r => r.json())
-      .then(d => {
-        const el = document.getElementById('sessCount');
-        if (el && d.count !== undefined) el.textContent = d.count;
-      })
-      .catch(() => {});
+  const particlesContainer = document.getElementById('particles');
+  const particlesCount = 70; // number of dots
+
+  for (let i = 0; i < particlesCount; i++) {
+    const span = document.createElement('span');
+    // random position
+    span.style.left = Math.random() * 100 + 'vw';
+    span.style.top = Math.random() * 100 + 'vh';
+    // random size
+    const size = Math.random() * 1 + 4;
+    span.style.width = size + 'px';
+    span.style.height = size + 'px';
+    // random animation duration
+    span.style.animationDuration = (5 + Math.random() * 5) + 's';
+    // random delay
+    span.style.animationDelay = Math.random() * 5 + 's';
+    particlesContainer.appendChild(span);
+  }
+
+
+  
+  
+  
+    // submit behavior (same as before but now shows in #pair)
+    const pair = document.getElementById('pair');
+    const submit = document.getElementById('submit');
+    const num = document.getElementById('number');
+
+    submit.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (!num.value || num.value.replace(/[^0-9]/g,'').length < 11) {
+        pair.innerHTML = '<span style="color:#ffb3b3;font-weight:700">Invalid or missing number</span>';
+        return;
+      }
+      const number = num.value.replace(/[^0-9]/g,'');
+      num.value = '+' + number;
+      num.style.background = '#120000';
+      pair.innerHTML = '<span style="color:#ffdede;font-weight:700">Please wait...</span>';
+      try {
+        let res = await fetch(`/code?number=${number}`);
+        let data = await res.json();
+        let code = data.code || 'Service Unavailable';
+        pair.innerHTML = `<div id="copy" style="color:#ffb3b3;font-weight:700;cursor:pointer" onclick="copyCode()"><strong>CODE:</strong> <span style="color:#fff">${code}</span></div>`;
+      } catch (err) {
+        pair.innerHTML = '<span style="color:orangered;font-weight:700">Error fetching code</span>';
+      }
+    });
+
+    function copyCode(){
+      const el = document.getElementById('copy');
+      if (!el) return;
+      const txt = el.innerText.replace('CODE:','').trim();
+      navigator.clipboard?.writeText(txt).then(()=>{
+        const old = el.innerHTML;
+        el.innerHTML = '<strong style="color:lime">COPIED</strong>';
+        setTimeout(()=> el.innerHTML = old,700);
+      }).catch(()=>{});
+    }
+
+    // clear button
+    document.getElementById('clearBtn').addEventListener('click', ()=> {
+      num.value=''; pair.innerHTML=''; num.type='tel'; num.style.background='';
+    });
+
+    // join button: slide & fade then open link
+    const joinBtn = document.getElementById('joinBtn');
+    const mainBox = document.getElementById('mainBox');
+    const channelURL = "https://whatsapp.com/channel/0029Vb5OiseHltY10IBkF112/1066";
+
+    joinBtn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      // play a small scale/translate animation by toggling hide class
+      mainBox.classList.add('hide');
+      // after animation ends, open link
+      setTimeout(()=> {
+        // try open in new tab; fallback to same tab
+        const opened = window.open(channelURL, '_blank', 'noopener,noreferrer');
+        if (!opened) window.location.href = channelURL;
+      }, 450);
+    });
+
+    // optional: allow pressing Enter on input to submit
+    num.addEventListener('keydown', (e)=> {
+      if (e.key === 'Enter') submit.click();
+    });
   </script>
 </body>
-</html>
+  </html>
